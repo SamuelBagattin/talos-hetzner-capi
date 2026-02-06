@@ -1,0 +1,31 @@
+{{- /*
+  Network policies for OTel Collector.
+
+  The cluster-wide default-deny already allows:
+  - Ingress from cluster entities
+  - Egress to cluster, kube-apiserver, DNS, HTTPS (443)
+
+  These policies add collector-specific rules beyond the defaults.
+*/ -}}
+
+---
+# OTel Collector needs to scrape kubelet metrics on node port 10250
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: otel-collector-scrape-kubelets
+  labels:
+    app.kubernetes.io/part-of: talos-hetzner-capi
+    app.kubernetes.io/managed-by: argocd
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/managed-by: opentelemetry-operator
+      app.kubernetes.io/instance: observability.otel-collector
+  egress:
+    - toEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "10250"
+              protocol: TCP

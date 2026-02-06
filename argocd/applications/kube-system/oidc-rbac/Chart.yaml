@@ -1,0 +1,5 @@
+apiVersion: v2
+name: oidc-rbac
+description: OIDC group-to-role ClusterRoleBindings for kubelogin authentication
+version: 0.1.0
+type: application

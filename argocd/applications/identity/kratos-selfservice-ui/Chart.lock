@@ -1,0 +1,6 @@
+dependencies:
+- name: kratos-selfservice-ui-node
+  repository: https://k8s.ory.sh/helm/charts
+  version: 0.60.1
+digest: sha256:8fd1b96104ed760afeb75d3add6aa7da2329499cdb9150a237e9cf2e2a84c78f
+generated: "2026-01-31T20:27:27.121338+01:00"

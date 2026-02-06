@@ -1,0 +1,8 @@
+# SOPS configuration for talos-hetzner-capi
+# Only the age PUBLIC key is stored here. Anyone with this file can encrypt.
+# The private key is stored in: 1Password, GitHub Secret (SOPS_AGE_KEY), and in-cluster sops-age-key Secret.
+creation_rules:
+  - path_regex: argocd/secrets/.*\.sops\.yaml$
+    encrypted_regex: "^(data|stringData)$"
+    age: >-
+      age1667se0alfxv9ufepu2d782yva9sdjf6kuv4xskpmn3rmhyhepd9srtkljf

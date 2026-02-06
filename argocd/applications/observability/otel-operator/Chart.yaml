@@ -1,0 +1,10 @@
+apiVersion: v2
+name: otel-operator
+description: OpenTelemetry Operator for managing collector CRDs
+version: 0.1.0
+type: application
+
+dependencies:
+  - name: opentelemetry-operator
+    version: 0.105.0
+    repository: https://open-telemetry.github.io/opentelemetry-helm-charts

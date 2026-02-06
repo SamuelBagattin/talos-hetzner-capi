@@ -1,0 +1,10 @@
+apiVersion: v2
+name: hydra
+description: Ory Hydra OAuth2/OIDC provider for cluster authentication
+version: 0.1.0
+type: application
+
+dependencies:
+  - name: hydra
+    version: 0.60.1
+    repository: https://k8s.ory.sh/helm/charts

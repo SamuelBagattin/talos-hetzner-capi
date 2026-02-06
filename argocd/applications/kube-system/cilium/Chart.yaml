@@ -1,0 +1,5 @@
+apiVersion: v2
+name: cilium
+description: Gateway and network policies for Cilium (Cilium itself is bootstrap-managed)
+version: 0.1.0
+type: application

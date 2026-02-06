@@ -1,0 +1,10 @@
+apiVersion: v2
+name: csi
+description: Hetzner Cloud CSI driver for dynamic PersistentVolume provisioning
+version: 0.1.0
+type: application
+
+dependencies:
+  - name: hcloud-csi
+    version: 2.18.3
+    repository: https://charts.hetzner.cloud

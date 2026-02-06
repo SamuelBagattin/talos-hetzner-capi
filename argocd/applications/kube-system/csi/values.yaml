@@ -1,0 +1,5 @@
+hcloud-csi:
+  controller:
+    hcloudVolumeDefaultLocation: nbg1
+  node:
+    hostNetwork: true

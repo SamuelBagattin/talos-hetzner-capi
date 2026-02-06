@@ -1,0 +1,43 @@
+# ServiceAccount for the collector (referenced in the CR)
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: otel-collector-sa
+
+---
+# ClusterRole for k8sattributes processor and prometheus SD
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: otel-collector
+rules:
+  # k8sattributes processor: resolve pod metadata
+  - apiGroups: [""]
+    resources: [pods, namespaces, nodes]
+    verbs: [get, list, watch]
+  # k8sattributes processor: resolve workload owners
+  - apiGroups: [apps]
+    resources: [deployments, statefulsets, daemonsets, replicasets]
+    verbs: [get, list, watch]
+  # prometheus receiver: kubernetes_sd_configs
+  - apiGroups: [""]
+    resources: [services, endpoints]
+    verbs: [get, list, watch]
+  # kubeletstats receiver: node stats
+  - apiGroups: [""]
+    resources: [nodes/stats, nodes/proxy]
+    verbs: [get]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: otel-collector
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: otel-collector
+subjects:
+  - kind: ServiceAccount
+    name: otel-collector-sa
+    namespace: observability

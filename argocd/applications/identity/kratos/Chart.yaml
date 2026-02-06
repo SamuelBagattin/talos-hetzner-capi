@@ -1,0 +1,10 @@
+apiVersion: v2
+name: kratos
+description: Ory Kratos identity management for self-service authentication flows
+version: 0.1.0
+type: application
+
+dependencies:
+  - name: kratos
+    version: 0.60.1
+    repository: https://k8s.ory.sh/helm/charts

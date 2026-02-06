@@ -1,0 +1,19 @@
+hydra-maester:
+  adminService:
+    # Hydra admin service in the same namespace (set via fullnameOverride in Story 4.3)
+    name: hydra-admin
+    port: 4445
+    scheme: http
+
+  # CX23 resource constraints
+  deployment:
+    resources:
+      requests:
+        cpu: 25m
+        memory: 64Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
+
+# Domain for OAuth2 client redirect URIs
+domain: cluster.samuelbagattin.com

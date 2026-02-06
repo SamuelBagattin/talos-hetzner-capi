@@ -1,0 +1,5 @@
+apiVersion: v2
+name: otel-collectors
+description: OpenTelemetryCollector CRs for metrics and log collection
+version: 0.1.0
+type: application

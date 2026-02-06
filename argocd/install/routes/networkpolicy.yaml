@@ -1,0 +1,17 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: argocd-server-allow-ingress
+  namespace: argocd
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: argocd-server
+  ingress:
+    - fromEntities:
+        - cluster
+        - ingress
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP

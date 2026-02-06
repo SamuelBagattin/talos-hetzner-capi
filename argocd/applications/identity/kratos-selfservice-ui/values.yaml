@@ -1,0 +1,30 @@
+kratos-selfservice-ui-node:
+  fullnameOverride: kratos-selfservice-ui
+
+  config:
+    csrfCookieName: "__HOST-id.cluster.samuelbagattin.com-csrf"
+
+  kratosAdminUrl: "http://kratos-admin.identity.svc.cluster.local"
+  kratosPublicUrl: "http://kratos-public.identity.svc.cluster.local"
+  kratosBrowserUrl: "https://kratos.cluster.samuelbagattin.com"
+
+  projectName: "Hetzner Infra"
+
+  secret:
+    enabled: false
+    nameOverride: kratos-selfservice-ui-secrets
+
+  deployment:
+    extraEnv:
+      - name: HYDRA_ADMIN_URL
+        value: "http://hydra-admin.identity.svc.cluster.local:4445"
+    resources:
+      requests:
+        cpu: 25m
+        memory: 64Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
+
+# Hostname for HTTPRoute
+hostname: id.cluster.samuelbagattin.com

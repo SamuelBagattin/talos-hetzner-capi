@@ -1,0 +1,20 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: cert-manager-allow-egress
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/instance: cert-manager-cert-manager
+  egress:
+    - toEntities:
+        - kube-apiserver
+    # DNS-01 propagation checks query authoritative nameservers directly
+    - toCIDR:
+        - 0.0.0.0/0
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP

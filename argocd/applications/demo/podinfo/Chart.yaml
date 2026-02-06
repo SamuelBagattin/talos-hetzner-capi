@@ -1,0 +1,10 @@
+apiVersion: v2
+name: podinfo
+description: Demo application for end-to-end platform validation (template for client apps)
+version: 0.1.0
+type: application
+
+dependencies:
+  - name: podinfo
+    version: 6.7.1
+    repository: oci://ghcr.io/stefanprodan/charts

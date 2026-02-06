@@ -1,0 +1,7 @@
+# OIDC group names matching Kratos/Hydra groups claim
+adminGroup: admin
+viewerGroup: viewer
+
+# OIDC users with cluster-admin (email from oidc-username-claim)
+adminUsers:
+  - samuel@samuelbagattin.com

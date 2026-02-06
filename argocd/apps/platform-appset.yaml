@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: platform
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: platform
+    app.kubernetes.io/part-of: talos-hetzner-capi
+    app.kubernetes.io/managed-by: argocd
+spec:
+  generators:
+    - git:
+        repoURL: https://github.com/samuelbagattin/talos-hetzner-capi.git
+        revision: HEAD
+        directories:
+          - path: argocd/applications/*/*
+  template:
+    metadata:
+      name: '{{path[2]}}-{{path[3]}}'
+      labels:
+        app.kubernetes.io/part-of: talos-hetzner-capi
+        app.kubernetes.io/managed-by: argocd
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/samuelbagattin/talos-hetzner-capi.git
+        targetRevision: HEAD
+        path: '{{path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{path[2]}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        managedNamespaceMetadata:
+          labels:
+            pod-security.kubernetes.io/enforce: privileged
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true

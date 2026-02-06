@@ -1,0 +1,10 @@
+apiVersion: v2
+name: kratos-selfservice-ui
+description: Ory Kratos self-service UI for login, registration, and account settings
+version: 0.1.0
+type: application
+
+dependencies:
+  - name: kratos-selfservice-ui-node
+    version: 0.60.1
+    repository: https://k8s.ory.sh/helm/charts

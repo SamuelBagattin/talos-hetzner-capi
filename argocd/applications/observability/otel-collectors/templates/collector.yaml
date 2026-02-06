@@ -1,0 +1,197 @@
+apiVersion: opentelemetry.io/v1beta1
+kind: OpenTelemetryCollector
+metadata:
+  name: otel-collector
+spec:
+  mode: daemonset
+  serviceAccount: otel-collector-sa
+
+  env:
+    - name: K8S_NODE_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: spec.nodeName
+    - name: K8S_POD_IP
+      valueFrom:
+        fieldRef:
+          fieldPath: status.podIP
+    - name: K8S_NODE_IP
+      valueFrom:
+        fieldRef:
+          fieldPath: status.hostIP
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 512Mi
+
+  volumeMounts:
+    - name: varlogpods
+      mountPath: /var/log/pods
+      readOnly: true
+
+  volumes:
+    - name: varlogpods
+      hostPath:
+        path: /var/log/pods
+
+  config:
+    receivers:
+      # --- Log collection (replaces VLAgent k8sCollector) ---
+      filelog:
+        include:
+          - /var/log/pods/*/*/*.log
+        exclude:
+          # Avoid log feedback loop from collector's own logs
+          - /var/log/pods/observability_otel-collector*/*/*.log
+        include_file_path: true
+        include_file_name: false
+        operators:
+          - type: container
+            id: container-parser
+
+      # --- Kubelet metrics (node/pod/container stats) ---
+      kubeletstats:
+        collection_interval: 30s
+        auth_type: serviceAccount
+        endpoint: https://${env:K8S_NODE_IP}:10250
+        insecure_skip_verify: true
+        metric_groups:
+          - node
+          - pod
+          - container
+
+      # --- Host metrics (CPU, memory, disk, etc.) ---
+      hostmetrics:
+        collection_interval: 30s
+        scrapers:
+          cpu: {}
+          memory: {}
+          disk: {}
+          filesystem: {}
+          load: {}
+          network: {}
+
+      # --- Prometheus scraping (replaces VMAgent) ---
+      prometheus:
+        config:
+          scrape_configs:
+            # Scrape service endpoints with prometheus.io annotations
+            - job_name: kubernetes-service-endpoints
+              scrape_interval: 30s
+              kubernetes_sd_configs:
+                - role: endpoints
+              relabel_configs:
+                - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+                  action: keep
+                  regex: "true"
+                - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+                  action: replace
+                  target_label: __scheme__
+                  regex: (https?)
+                - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+                  action: replace
+                  target_label: __metrics_path__
+                  regex: (.+)
+                - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+                  action: replace
+                  target_label: __address__
+                  regex: ([^:]+)(?::\d+)?;(\d+)
+                  replacement: $$1:$$2
+                - source_labels: [__meta_kubernetes_service_name]
+                  action: replace
+                  target_label: service
+
+            # Scrape pods with prometheus.io annotations
+            - job_name: kubernetes-pods
+              scrape_interval: 30s
+              kubernetes_sd_configs:
+                - role: pod
+              relabel_configs:
+                - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+                  action: keep
+                  regex: "true"
+                - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scheme]
+                  action: replace
+                  target_label: __scheme__
+                  regex: (https?)
+                - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+                  action: replace
+                  target_label: __metrics_path__
+                  regex: (.+)
+                - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+                  action: replace
+                  target_label: __address__
+                  regex: ([^:]+)(?::\d+)?;(\d+)
+                  replacement: $$1:$$2
+
+      # --- OTLP receiver for apps pushing telemetry ---
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+
+    processors:
+      memory_limiter:
+        check_interval: 5s
+        limit_percentage: 80
+        spike_limit_percentage: 25
+
+      batch:
+        timeout: 10s
+        send_batch_size: 1024
+
+      k8sattributes:
+        filter:
+          node_from_env_var: K8S_NODE_NAME
+        extract:
+          metadata:
+            - k8s.namespace.name
+            - k8s.pod.name
+            - k8s.pod.uid
+            - k8s.node.name
+            - k8s.deployment.name
+            - k8s.statefulset.name
+            - k8s.daemonset.name
+            - k8s.container.name
+        pod_association:
+          - sources:
+              - from: resource_attribute
+                name: k8s.pod.uid
+          - sources:
+              - from: resource_attribute
+                name: k8s.pod.ip
+          - sources:
+              - from: connection
+
+      resource:
+        attributes:
+          - key: k8s.cluster.name
+            value: hetzner
+            action: upsert
+
+    exporters:
+      otlphttp/metrics:
+        endpoint: http://vmsingle-vm-stack.observability.svc:8428/opentelemetry
+        tls:
+          insecure: true
+
+      otlphttp/logs:
+        endpoint: http://vlsingle-vlsingle.observability.svc:9428/insert/opentelemetry
+        tls:
+          insecure: true
+
+    service:
+      pipelines:
+        metrics:
+          receivers: [otlp, prometheus, kubeletstats, hostmetrics]
+          processors: [k8sattributes, memory_limiter, resource, batch]
+          exporters: [otlphttp/metrics]
+        logs:
+          receivers: [filelog, otlp]
+          processors: [k8sattributes, memory_limiter, resource, batch]
+          exporters: [otlphttp/logs]

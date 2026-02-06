@@ -1,0 +1,28 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: cloudnative-pg-operator
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: cloudnative-pg
+  egress:
+    # Operator watches CRDs and updates status via kube-apiserver
+    - toEntities:
+        - kube-apiserver
+    # Operator manages PostgreSQL pods in the postgres namespace
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: postgres
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
+  ingress:
+    # Validating/mutating admission webhooks called by kube-apiserver
+    - fromEntities:
+        - kube-apiserver
+      toPorts:
+        - ports:
+            - port: "9443"
+              protocol: TCP

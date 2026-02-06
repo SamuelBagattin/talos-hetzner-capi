@@ -1,0 +1,50 @@
+hydra:
+  hydra:
+    config:
+      serve:
+        public:
+          port: 4444
+        admin:
+          port: 4445
+        tls:
+          # Gateway terminates TLS, trust private network ranges
+          allow_termination_from:
+            - 10.0.0.0/8
+            - 172.16.0.0/12
+            - 192.168.0.0/16
+      urls:
+        self:
+          issuer: https://auth.cluster.samuelbagattin.com/
+        login: https://id.cluster.samuelbagattin.com/login
+        consent: https://id.cluster.samuelbagattin.com/consent
+      secrets: {}
+    automigration:
+      # Run database migrations as a job on install/upgrade
+      enabled: true
+      type: job
+
+  # Disable chart-managed secret — use SOPS-managed hydra-secrets instead
+  # Keys expected in hydra-secrets: dsn, secretsSystem, secretsCookie
+  secret:
+    enabled: false
+    nameOverride: hydra-secrets
+
+  # Prevent double-hydra naming (release=identity-hydra, chart=hydra)
+  fullnameOverride: hydra
+
+  # Disable bundled hydra-maester — deployed separately in Story 4.5
+  maester:
+    enabled: false
+
+  # CX23 resource constraints
+  deployment:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+
+# Hostname for HTTPRoute
+hostname: auth.cluster.samuelbagattin.com

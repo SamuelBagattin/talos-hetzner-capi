@@ -1,0 +1,18 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: kratos-selfservice-ui
+  labels:
+    app.kubernetes.io/name: kratos-selfservice-ui
+    app.kubernetes.io/part-of: talos-hetzner-capi
+    app.kubernetes.io/managed-by: argocd
+spec:
+  parentRefs:
+    - name: envoy-gateway
+      namespace: envoy-gateway-system
+  hostnames:
+    - {{ .Values.hostname | default "id.cluster.samuelbagattin.com" | quote }}
+  rules:
+    - backendRefs:
+        - name: kratos-selfservice-ui
+          port: 80

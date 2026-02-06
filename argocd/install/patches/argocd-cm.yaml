@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cm
+data:
+  url: https://argocd.cluster.samuelbagattin.com
+  # OIDC is non-functional until Epic 4 deploys Hydra.
+  # ArgoCD is accessible only via kubectl during bootstrap.
+  # Once Hydra deploys, OIDC starts working without reconfiguration.
+  oidc.config: |
+    name: Hydra
+    issuer: https://auth.cluster.samuelbagattin.com/
+    clientID: c6862ca9-9475-4137-9ac8-f07f1633ae77
+    requestedScopes:
+      - openid
+      - profile
+      - email
+      - groups

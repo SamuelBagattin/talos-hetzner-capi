@@ -1,0 +1,25 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: podinfo-allow-ingress
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: podinfo
+  ingress:
+    - fromEntities:
+        - cluster
+        - ingress
+      toPorts:
+        - ports:
+            - port: "9898"
+              protocol: TCP
+  egress:
+    - toEntities:
+        - kube-apiserver
+    - toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP

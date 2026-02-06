@@ -1,0 +1,10 @@
+apiVersion: v2
+name: vm-stack
+description: Cluster observability with VictoriaMetrics, VictoriaLogs, and Grafana
+version: 0.1.0
+type: application
+
+dependencies:
+  - name: victoria-metrics-k8s-stack
+    version: 0.69.0
+    repository: https://victoriametrics.github.io/helm-charts

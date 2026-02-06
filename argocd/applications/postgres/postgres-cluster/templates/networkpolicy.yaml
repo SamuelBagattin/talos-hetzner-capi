@@ -1,0 +1,33 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: postgres-cluster
+spec:
+  endpointSelector:
+    matchLabels:
+      cnpg.io/cluster: {{ .Values.clusterName }}
+  ingress:
+    # Hydra and Kratos connect from the identity namespace
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: identity
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    # Grafana connects from the observability namespace
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: observability
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    # CNPG operator manages instances from cnpg-system namespace
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: cnpg-system
+  egress:
+    # Instance manager reports status to kube-apiserver
+    - toEntities:
+        - kube-apiserver

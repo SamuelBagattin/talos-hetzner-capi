@@ -1,0 +1,8 @@
+cert-manager:
+  crds:
+    enabled: true
+  config:
+    enableGatewayAPI: true
+
+# Email for Let's Encrypt ACME registration
+acmeEmail: admin@samuelbagattin.com

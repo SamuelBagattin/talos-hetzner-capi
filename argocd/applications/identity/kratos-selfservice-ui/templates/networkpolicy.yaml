@@ -1,0 +1,39 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: kratos-selfservice-ui
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: kratos-selfservice-ui-node
+  ingress:
+    # Gateway forwards user browser requests
+    - fromEntities:
+        - cluster
+        - ingress
+      toPorts:
+        - ports:
+            - port: "3000"
+              protocol: TCP
+  egress:
+    # Kratos public and admin APIs (intra-namespace)
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: identity
+      toPorts:
+        - ports:
+            - port: "4433"
+              protocol: TCP
+            - port: "4434"
+              protocol: TCP
+    # DNS resolution
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP

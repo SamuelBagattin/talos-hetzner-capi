@@ -1,0 +1,45 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: kratos
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: kratos
+  ingress:
+    # Self-Service UI and Hydra within identity namespace
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: identity
+    # Cilium Gateway API (public API exposed via HTTPRoute)
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            io.cilium.gateway/owning-gateway: cilium-gateway
+  egress:
+    # PostgreSQL database in postgres namespace
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: postgres
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    # Hydra admin API (intra-namespace)
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: identity
+    # kube-apiserver access
+    - toEntities:
+        - kube-apiserver
+    # DNS resolution
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP

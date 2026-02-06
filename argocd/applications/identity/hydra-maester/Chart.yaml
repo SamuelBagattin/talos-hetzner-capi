@@ -1,0 +1,10 @@
+apiVersion: v2
+name: hydra-maester
+description: Hydra-Maester controller and OAuth2 client CRDs for ArgoCD, Grafana, and kubectl
+version: 0.1.0
+type: application
+
+dependencies:
+  - name: hydra-maester
+    version: 0.60.1
+    repository: https://k8s.ory.sh/helm/charts

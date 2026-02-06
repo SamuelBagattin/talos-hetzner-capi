@@ -1,0 +1,18 @@
+clusterName: postgres-cluster
+replicas: 2
+storageSize: 10Gi
+storageClass: hcloud-volumes
+
+# PostgreSQL tuning for CX23 nodes (4GB RAM shared across all workloads)
+sharedBuffers: "128MB"
+effectiveCacheSize: "256MB"
+
+# Databases and owners created during bootstrap
+# First database is created by initdb, additional via postInitSQL
+databases:
+  - name: hydra
+    owner: hydra
+  - name: kratos
+    owner: kratos
+  - name: grafana
+    owner: grafana

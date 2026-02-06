@@ -1,0 +1,39 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: {{ .Values.clusterName }}
+spec:
+  instances: {{ .Values.replicas }}
+
+  storage:
+    size: {{ .Values.storageSize }}
+    storageClass: {{ .Values.storageClass }}
+
+  bootstrap:
+    initdb:
+      database: {{ (index .Values.databases 0).name }}
+      owner: {{ (index .Values.databases 0).owner }}
+      postInitSQL:
+        {{- range $i, $db := .Values.databases }}
+        {{- if gt $i 0 }}
+        - CREATE ROLE {{ $db.owner }} LOGIN;
+        - CREATE DATABASE {{ $db.name }} OWNER {{ $db.owner }};
+        {{- end }}
+        {{- end }}
+
+  postgresql:
+    parameters:
+      shared_buffers: {{ .Values.sharedBuffers | quote }}
+      effective_cache_size: {{ .Values.effectiveCacheSize | quote }}
+
+  managed:
+    roles:
+      {{- range $i, $db := .Values.databases }}
+      {{- if gt $i 0 }}
+      - name: {{ $db.owner }}
+        login: true
+        ensure: present
+        passwordSecret:
+          name: {{ $db.owner }}-db-password
+      {{- end }}
+      {{- end }}

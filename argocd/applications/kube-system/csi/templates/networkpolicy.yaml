@@ -1,0 +1,11 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: csi-allow-egress
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: hcloud-csi
+  egress:
+    - toEntities:
+        - kube-apiserver

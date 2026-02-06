@@ -1,0 +1,150 @@
+# Grafana external hostname for HTTPRoute template
+grafanaHostname: grafana.cluster.samuelbagattin.com
+
+victoria-metrics-k8s-stack:
+  # Shorten generated resource names — default includes full chart name
+  # which exceeds 63-char K8s Service name limit
+  fullnameOverride: vm-stack
+
+  # --- VMSingle: metrics storage ---
+  vmsingle:
+    spec:
+      # 7 days retention — CX23 nodes have 40GB NVMe each, conserve disk
+      retentionPeriod: "7d"
+      storage:
+        resources:
+          requests:
+            # Conservative for 3x CX23 — monitor and adjust
+            storage: 10Gi
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          memory: 1Gi
+      # Convert OTel metric names to Prometheus conventions so existing
+      # dashboards and alerting rules continue to work
+      extraArgs:
+        opentelemetry.usePrometheusNaming: "true"
+
+  # --- VMAgent: disabled, replaced by OTel Collector ---
+  vmagent:
+    enabled: false
+
+  # --- VMAlert: alerting engine ---
+  # Enabled by default upstream — only set resources
+  vmalert:
+    spec:
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          memory: 128Mi
+
+  # --- Grafana: bundled with VM datasource auto-configured ---
+  grafana:
+    # PostgreSQL backend for persistent storage (dashboards, users, etc.)
+    # Password injected from SOPS-encrypted secret in observability namespace
+    envValueFrom:
+      GF_DATABASE_PASSWORD:
+        secretKeyRef:
+          name: grafana-db-credentials
+          key: password
+    # VictoriaLogs datasource plugin — requires internet at pod startup
+    plugins:
+      - victoriametrics-logs-datasource
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        memory: 256Mi
+    grafana.ini:
+      database:
+        type: postgres
+        host: postgres-cluster-rw.postgres.svc.cluster.local:5432
+        name: grafana
+        user: grafana
+        ssl_mode: require
+      server:
+        # Public URL for OAuth redirects — Gateway terminates TLS
+        root_url: https://grafana.cluster.samuelbagattin.com
+      auth:
+        # Disable default login form — only Hydra OIDC
+        disable_login_form: true
+      auth.generic_oauth:
+        # OIDC via Ory Hydra
+        enabled: true
+        name: Hydra
+        client_id: 9fd04351-d147-44ca-8fa1-2fb518e66ff5
+        scopes: openid profile email groups
+        auth_url: https://auth.cluster.samuelbagattin.com/oauth2/auth
+        token_url: https://auth.cluster.samuelbagattin.com/oauth2/token
+        api_url: https://auth.cluster.samuelbagattin.com/userinfo
+        auto_login: true
+        allow_assign_grafana_admin: true
+        role_attribute_path: "email == 'samuel@samuelbagattin.com' && 'Admin' || 'Viewer'"
+
+  # --- Extra datasources for Grafana ---
+  defaultDatasources:
+    extra:
+      - name: VictoriaLogs
+        type: victoriametrics-logs-datasource
+        access: proxy
+        # VLSingle service name follows operator convention: vlsingle-<name>
+        url: http://vlsingle-vlsingle:9428
+
+  # --- Sub-chart resource limits ---
+  kube-state-metrics:
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        memory: 128Mi
+
+  prometheus-node-exporter:
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        memory: 64Mi
+
+  # --- Kubernetes component scraping ---
+  # Talos Linux note: kube-controller-manager, kube-scheduler, and etcd may
+  # not expose metrics at standard endpoints. These are enabled optimistically;
+  # unreachable targets will show as down but won't break scraping.
+  kubeControllerManager:
+    enabled: true
+  kubeScheduler:
+    enabled: true
+  kubeEtcd:
+    enabled: true
+
+  # --- VictoriaLogs via operator CRDs (extraObjects) ---
+  # The bundled operator manages VLSingle/VLAgent CRDs. This keeps
+  # everything in a single ArgoCD application.
+  extraObjects:
+    # VLSingle: log storage engine
+    - apiVersion: operator.victoriametrics.com/v1
+      kind: VLSingle
+      metadata:
+        name: vlsingle
+        namespace: observability
+      spec:
+        retentionPeriod: "7d"
+        storage:
+          resources:
+            requests:
+              # Conservative for CX23 disk constraints
+              storage: 10Gi
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            memory: 256Mi
+
+    # VLAgent removed — replaced by OTel Collector (otel-collectors app)

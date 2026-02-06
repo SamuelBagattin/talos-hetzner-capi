@@ -1,0 +1,3 @@
+# Envoy Gateway controller configuration
+# Default access log format (JSON to stdout) is used — no override needed
+gateway-helm: {}

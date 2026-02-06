@@ -1,0 +1,129 @@
+kratos:
+  # Prevent double-naming (release=identity-kratos, chart=kratos)
+  fullnameOverride: kratos
+
+  kratos:
+    automigration:
+      enabled: true
+      type: job
+
+    identitySchemas:
+      "identity.default.schema.json": |
+        {
+          "$id": "https://schemas.ory.sh/presets/kratos/identity.schema.json",
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "title": "Person",
+          "type": "object",
+          "properties": {
+            "traits": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "format": "email",
+                  "pattern": "@samuelbagattin\\.com$",
+                  "title": "Email",
+                  "ory.sh/kratos": {
+                    "credentials": { "password": { "identifier": true } },
+                    "verification": { "via": "email" },
+                    "recovery": { "via": "email" }
+                  }
+                },
+                "name": {
+                  "type": "object",
+                  "properties": {
+                    "first": { "type": "string", "title": "First Name" },
+                    "last": { "type": "string", "title": "Last Name" }
+                  }
+                }
+              },
+              "required": ["email"],
+              "additionalProperties": false
+            }
+          }
+        }
+      "oidc.google.jsonnet": |
+        local claims = {
+          email_verified: false,
+        } + std.extVar('claims');
+
+        {
+          identity: {
+            traits: {
+              email: claims.email,
+              name: {
+                first: claims.given_name,
+                last: claims.family_name,
+              },
+            },
+            [if claims.email_verified then "verified_addresses"]: [{
+              via: "email",
+              value: claims.email,
+            }],
+          },
+        }
+
+    config:
+      identity:
+        default_schema_id: default
+        schemas:
+          - id: default
+            url: file:///etc/config/identity.default.schema.json
+
+      selfservice:
+        default_browser_return_url: https://id.cluster.samuelbagattin.com/
+        methods:
+          password:
+            enabled: false
+          oidc:
+            enabled: true
+            # providers array injected at runtime via SELFSERVICE_METHODS_OIDC_CONFIG_PROVIDERS
+            # env var from kratos-secrets (contains client_id/client_secret)
+        flows:
+          login:
+            ui_url: https://id.cluster.samuelbagattin.com/login
+          registration:
+            ui_url: https://id.cluster.samuelbagattin.com/registration
+            enabled: true
+          settings:
+            ui_url: https://id.cluster.samuelbagattin.com/settings
+          recovery:
+            ui_url: https://id.cluster.samuelbagattin.com/recovery
+            enabled: true
+          verification:
+            ui_url: https://id.cluster.samuelbagattin.com/verification
+            enabled: true
+
+      oauth2_provider:
+        # Hydra admin API for OAuth2 login/consent delegation
+        url: http://hydra-admin.identity.svc.cluster.local:4445
+
+      cookies:
+        domain: .cluster.samuelbagattin.com
+
+      serve:
+        public:
+          base_url: https://kratos.cluster.samuelbagattin.com/
+          port: 4433
+        admin:
+          port: 4434
+
+  # Disable chart-managed secret — use SOPS-managed kratos-secrets instead
+  # Keys expected: dsn, secretsDefault, secretsCookie, secretsCipher
+  secret:
+    enabled: false
+    nameOverride: kratos-secrets
+
+  # CX23 resource constraints
+  deployment:
+    environmentSecretsName: kratos-secrets
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+
+# Hostname for HTTPRoute
+hostname: kratos.cluster.samuelbagattin.com

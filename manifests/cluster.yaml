@@ -1,0 +1,170 @@
+---
+# Cluster API core resource.
+# Defines cluster-level networking CIDRs and references to infra + control plane providers.
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  name: k8s
+  namespace: default
+  labels:
+    cni: cilium
+    ccm: hcloud
+    ccm-talos: "true"
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks:
+        - 10.10.128.0/17
+    services:
+      cidrBlocks:
+        - 10.10.96.0/20
+  controlPlaneRef:
+    apiVersion: controlplane.cluster.x-k8s.io/v1alpha3
+    kind: TalosControlPlane
+    name: k8s-control-plane
+  infrastructureRef:
+    apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+    kind: HetznerCluster
+    name: k8s
+---
+# HetznerCluster — Hetzner Cloud infrastructure.
+# Creates: private network + subnet, load balancer, placement group.
+# NOTE: CAPH v1.0.7 does NOT manage Hetzner firewalls. Create them separately (see Makefile).
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: HetznerCluster
+metadata:
+  name: k8s
+  namespace: default
+spec:
+  controlPlaneEndpoint:
+    host: ""  # Auto-populated by CAPH with the LB private IP
+    port: 6443
+  controlPlaneLoadBalancer:
+    enabled: true
+    region: nbg1
+    type: lb11
+    port: 6443
+    algorithm: round_robin
+    # Expose Talos API through the LB for talosctl access
+    extraServices:
+      - protocol: tcp
+        listenPort: 50000
+        destinationPort: 50000
+  controlPlaneRegions:
+    - nbg1
+  hcloudNetwork:
+    enabled: true
+    cidrBlock: "10.10.0.0/16"
+    subnetCidrBlock: "10.10.64.0/25"
+    networkZone: eu-central
+  hcloudPlacementGroups:
+    - name: control-plane
+      type: spread
+  sshKeys:
+    hcloud: []  # Talos doesn't use SSH keys
+  hetznerSecretRef:
+    name: hetzner
+    key:
+      hcloudToken: hcloud-token
+---
+# HCloudMachineTemplate — Server spec for control plane nodes.
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: HCloudMachineTemplate
+metadata:
+  name: k8s-control-plane
+  namespace: default
+spec:
+  template:
+    spec:
+      type: cx33
+      imageName: "talos-amd64-v1.12.2"
+      placementGroupName: control-plane
+      publicNetwork:
+        enableIPv4: true
+        enableIPv6: true
+---
+# TalosControlPlane — Control plane definition with Talos machine config patches.
+# Control-plane-only cluster: no MachineDeployment/workers.
+# All workloads schedule on CP nodes via allowSchedulingOnControlPlanes.
+apiVersion: controlplane.cluster.x-k8s.io/v1alpha3
+kind: TalosControlPlane
+metadata:
+  name: k8s-control-plane
+  namespace: default
+spec:
+  version: v1.32.2
+  replicas: 3
+  infrastructureTemplate:
+    apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+    kind: HCloudMachineTemplate
+    name: k8s-control-plane
+  controlPlaneConfig:
+    controlplane:
+      generateType: controlplane
+      talosVersion: v1.12
+      hostname:
+        source: InfrastructureName
+      strategicPatches:
+        # Patch 1: Remove exclude-from-external-load-balancers label.
+        # Talos auto-adds this for CP nodes; we delete it so CP nodes can be
+        # LB targets (control-plane-only cluster).
+        - |
+          machine:
+            nodeLabels:
+              node.kubernetes.io/exclude-from-external-load-balancers:
+                $patch: delete
+        # Patch 2: Machine-level configuration.
+        - |
+          machine:
+            network:
+              interfaces:
+                - interface: eth0
+                  dhcp: true
+                - interface: eth1
+                  dhcp: true
+            kubelet:
+              extraArgs:
+                cloud-provider: external
+                rotate-server-certificates: "true"
+              nodeIP:
+                validSubnets:
+                  - "10.10.0.0/16"
+            features:
+              hostDNS:
+                enabled: true
+                forwardKubeDNSToHost: false
+                resolveMemberNames: true
+              kubernetesTalosAPIAccess:
+                enabled: true
+                allowedRoles:
+                  - os:reader
+                allowedKubernetesNamespaces:
+                  - kube-system
+        # Patch 3: Cluster-level configuration.
+        - |
+          cluster:
+            allowSchedulingOnControlPlanes: true
+            network:
+              podSubnets:
+                - "10.10.128.0/17"
+              serviceSubnets:
+                - "10.10.96.0/20"
+              cni:
+                name: none
+            proxy:
+              disabled: true
+            etcd:
+              advertisedSubnets:
+                - "10.10.64.0/25"
+            externalCloudProvider:
+              enabled: true
+            controllerManager:
+              extraArgs:
+                cloud-provider: external
+            apiServer:
+              extraArgs:
+                enable-aggregator-routing: "true"
+                oidc-issuer-url: "https://auth.cluster.samuelbagattin.com/"
+                oidc-client-id: "72f859b5-8a3d-4718-afbb-a756e7c03214"
+                oidc-username-claim: email
+                oidc-groups-claim: groups

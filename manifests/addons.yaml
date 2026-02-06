@@ -1,0 +1,124 @@
+---
+# Cilium CNI — installed via CAAPH as soon as the workload cluster API is reachable.
+# No options.wait: avoids hubble timeout caused by uninitialized taint (issue #4).
+apiVersion: addons.cluster.x-k8s.io/v1alpha1
+kind: HelmChartProxy
+metadata:
+  name: cilium
+  namespace: default
+spec:
+  clusterSelector:
+    matchLabels:
+      cni: cilium
+  repoURL: https://helm.cilium.io/
+  chartName: cilium
+  version: 1.19.0
+  namespace: kube-system
+  releaseName: cilium
+  valuesTemplate: |
+    ipam:
+      mode: kubernetes
+    k8s:
+      requireIPv4PodCIDR: true
+    kubeProxyReplacement: true
+    k8sServiceHost: 127.0.0.1
+    k8sServicePort: 7445
+    cgroup:
+      autoMount:
+        enabled: false
+      hostRoot: /sys/fs/cgroup
+    securityContext:
+      capabilities:
+        ciliumAgent:
+          - CHOWN
+          - KILL
+          - NET_ADMIN
+          - NET_RAW
+          - IPC_LOCK
+          - SYS_ADMIN
+          - SYS_RESOURCE
+          - DAC_OVERRIDE
+          - FOWNER
+          - SETGID
+          - SETUID
+        cleanCiliumState:
+          - NET_ADMIN
+          - SYS_ADMIN
+          - SYS_RESOURCE
+    hubble:
+      enabled: true
+      relay:
+        enabled: true
+      ui:
+        enabled: true
+    gatewayAPI:
+      enabled: true
+---
+# Hetzner Cloud Controller Manager — manages node providerID, removes uninitialized taint.
+# Uses valuesTemplate to inject clusterCIDR from the Cluster spec.
+# References the hcloud secret created by ClusterResourceSet below.
+apiVersion: addons.cluster.x-k8s.io/v1alpha1
+kind: HelmChartProxy
+metadata:
+  name: hcloud-ccm
+  namespace: default
+spec:
+  clusterSelector:
+    matchLabels:
+      ccm: hcloud
+  repoURL: https://charts.hetzner.cloud
+  chartName: hcloud-cloud-controller-manager
+  version: 1.29.2
+  namespace: kube-system
+  releaseName: hcloud-ccm
+  valuesTemplate: |
+    env:
+      HCLOUD_TOKEN:
+        valueFrom:
+          secretKeyRef:
+            name: hcloud
+            key: token
+    networking:
+      enabled: true
+      clusterCIDR: "{{ index .Cluster.spec.clusterNetwork.pods.cidrBlocks 0 }}"
+      network:
+        valueFrom:
+          secretKeyRef:
+            name: hcloud
+            key: network
+---
+# Talos Cloud Controller Manager — approves node CSRs.
+apiVersion: addons.cluster.x-k8s.io/v1alpha1
+kind: HelmChartProxy
+metadata:
+  name: talos-ccm
+  namespace: default
+spec:
+  clusterSelector:
+    matchLabels:
+      ccm-talos: "true"
+  repoURL: oci://ghcr.io/siderolabs/charts
+  chartName: talos-cloud-controller-manager
+  version: 0.5.4
+  namespace: kube-system
+  releaseName: talos-ccm
+  valuesTemplate: |
+    enabledControllers:
+      - node-csr-approval
+---
+# ClusterResourceSet — creates the hcloud secret on the workload cluster.
+# The secret contains the HCLOUD_TOKEN and network name needed by hcloud-ccm.
+# Strategy: ApplyOnce — only applied once when the cluster is first created.
+apiVersion: addons.cluster.x-k8s.io/v1beta1
+kind: ClusterResourceSet
+metadata:
+  name: hcloud-secret
+  namespace: default
+spec:
+  clusterSelector:
+    matchLabels:
+      ccm: hcloud
+  resources:
+    - kind: Secret
+      name: hcloud-secret-manifest
+  strategy: ApplyOnce

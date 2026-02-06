@@ -1,0 +1,24 @@
+---
+# MachineHealthCheck for control plane nodes.
+# Automatically remediates unhealthy CP nodes.
+# For a 3-node CP cluster, maxUnhealthy=1 ensures at most 1 node
+# is remediated at a time to maintain etcd quorum.
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: MachineHealthCheck
+metadata:
+  name: k8s-control-plane-mhc
+  namespace: default
+spec:
+  clusterName: k8s
+  maxUnhealthy: 1
+  nodeStartupTimeout: 15m
+  selector:
+    matchLabels:
+      cluster.x-k8s.io/control-plane-name: k8s-control-plane
+  unhealthyConditions:
+    - type: Ready
+      status: "False"
+      timeout: 5m
+    - type: Ready
+      status: Unknown
+      timeout: 5m

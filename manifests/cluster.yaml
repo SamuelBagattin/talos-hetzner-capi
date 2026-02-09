@@ -165,6 +165,6 @@ spec:
               extraArgs:
                 enable-aggregator-routing: "true"
                 oidc-issuer-url: "https://auth.cluster.samuelbagattin.com/"
-                oidc-client-id: "72f859b5-8a3d-4718-afbb-a756e7c03214"
+                oidc-client-id: "843751f3-02f8-4b7d-a0b8-82685320b60d"
                 oidc-username-claim: email
                 oidc-groups-claim: groups

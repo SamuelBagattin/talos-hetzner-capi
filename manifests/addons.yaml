@@ -52,7 +52,7 @@ spec:
       ui:
         enabled: true
     gatewayAPI:
-      enabled: true
+      enabled: false
 ---
 # Hetzner Cloud Controller Manager — manages node providerID, removes uninitialized taint.
 # Uses valuesTemplate to inject clusterCIDR from the Cluster spec.

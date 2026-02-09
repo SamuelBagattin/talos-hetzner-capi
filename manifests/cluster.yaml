@@ -105,6 +105,11 @@ spec:
       hostname:
         source: InfrastructureName
       strategicPatches:
+        # Rollout trigger annotation — change value to force rolling update.
+        - |
+          machine:
+            nodeAnnotations:
+              rollout-trigger: "2026-02-09T15:00:00Z"
         # Patch 1: Remove exclude-from-external-load-balancers label.
         # Talos auto-adds this for CP nodes; we delete it so CP nodes can be
         # LB targets (control-plane-only cluster).

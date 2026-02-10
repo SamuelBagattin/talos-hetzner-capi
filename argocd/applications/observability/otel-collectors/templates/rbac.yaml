@@ -19,6 +19,9 @@ rules:
   - apiGroups: [apps]
     resources: [deployments, statefulsets, daemonsets, replicasets]
     verbs: [get, list, watch]
+  - apiGroups: [batch]
+    resources: [jobs, cronjobs]
+    verbs: [get, list, watch]
   # prometheus receiver: kubernetes_sd_configs
   - apiGroups: [""]
     resources: [services, endpoints]

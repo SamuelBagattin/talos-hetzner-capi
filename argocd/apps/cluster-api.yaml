@@ -12,7 +12,7 @@ spec:
   source:
     repoURL: https://github.com/samuelbagattin/talos-hetzner-capi.git
     targetRevision: HEAD
-    path: argocd/cluster-api
+    path: manifests
   destination:
     server: https://kubernetes.default.svc
     namespace: default

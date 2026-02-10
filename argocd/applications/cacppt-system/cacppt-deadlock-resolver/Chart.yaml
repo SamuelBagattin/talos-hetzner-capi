@@ -6,5 +6,5 @@ type: application
 
 dependencies:
   - name: cacppt-deadlock-resolver
-    version: 0.0.0-feat-helm-chart-cicd.7915e4b
+    version: 0.0.0-feat-helm-chart-cicd.935cb26
     repository: oci://ghcr.io/samuelbagattin/charts

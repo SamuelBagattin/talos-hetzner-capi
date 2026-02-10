@@ -1,0 +1,10 @@
+spegel:
+  spegel:
+    containerdRegistryConfigPath: /etc/cri/conf.d/hosts
+
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+    limits:
+      memory: 128Mi

@@ -1,6 +1,6 @@
 dependencies:
 - name: cacppt-deadlock-resolver
   repository: oci://ghcr.io/samuelbagattin/charts
-  version: 0.0.0-feat-helm-chart-cicd.b730a34
-digest: sha256:1feb04b8a4fb9e77fef2fd6be232a550295a1fc795a4ed06c46a6f56c1d91f42
-generated: "2026-02-10T16:32:55.933731+01:00"
+  version: 0.0.0-feat-helm-chart-cicd.4a6f0fb
+digest: sha256:93e5f6ec43b64362f4d3a55e353956145682fda0749fc6f69fce4e31d6c9fb70
+generated: "2026-02-10T16:56:42.319307+01:00"

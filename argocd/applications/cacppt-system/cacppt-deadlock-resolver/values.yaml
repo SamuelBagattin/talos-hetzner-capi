@@ -1,0 +1,5 @@
+cacppt-deadlock-resolver:
+  env:
+    POLL_INTERVAL: "20"
+    STUCK_THRESHOLD: "120"
+    DRY_RUN: "false"

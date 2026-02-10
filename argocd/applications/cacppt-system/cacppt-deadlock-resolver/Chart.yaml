@@ -1,0 +1,10 @@
+apiVersion: v2
+name: cacppt-deadlock-resolver
+description: Resolves CACPPT deadlocks by detecting and remediating stuck machines
+version: 0.1.0
+type: application
+
+dependencies:
+  - name: cacppt-deadlock-resolver
+    version: 0.0.0-feat-helm-chart-cicd.7db0fde
+    repository: oci://ghcr.io/samuelbagattin/charts

@@ -92,7 +92,7 @@ metadata:
   name: k8s-control-plane
   namespace: default
 spec:
-  version: v1.32.2
+  version: v1.33.8
   replicas: 3
   infrastructureTemplate:
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1

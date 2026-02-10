@@ -13,7 +13,7 @@
 
 CLUSTER_NAME    ?= k8s
 TALOS_VERSION   ?= v1.12.2
-K8S_VERSION     ?= v1.33.7
+K8S_VERSION     ?= v1.34.3
 LOCATION        ?= nbg1
 
 # CAPI provider versions

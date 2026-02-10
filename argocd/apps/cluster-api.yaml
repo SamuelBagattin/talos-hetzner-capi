@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cluster-api
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: cluster-api
+    app.kubernetes.io/part-of: talos-hetzner-capi
+    app.kubernetes.io/managed-by: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/samuelbagattin/talos-hetzner-capi.git
+    targetRevision: HEAD
+    path: argocd/cluster-api
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true

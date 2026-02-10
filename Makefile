@@ -61,7 +61,7 @@ kind-create:
 capi-init:
 	@echo "==> Installing CAPI providers (including CAAPH)..."
 	KUBECONFIG=$(MGMT_KUBECONFIG) clusterctl init \
-		--config manifests/clusterctl.yaml \
+		--config cluster-api/clusterctl.yaml \
 		--core cluster-api:$(CAPI_VERSION) \
 		--bootstrap talos:$(CABPT_VERSION) \
 		--control-plane talos:$(CACPPT_VERSION) \
@@ -94,8 +94,8 @@ secret:
 
 apply:
 	@echo "==> Applying cluster and addon manifests..."
-	KUBECONFIG=$(MGMT_KUBECONFIG) kubectl apply -f manifests/cluster.yaml
-	KUBECONFIG=$(MGMT_KUBECONFIG) kubectl apply -f manifests/addons.yaml
+	KUBECONFIG=$(MGMT_KUBECONFIG) kubectl apply -f cluster-api/cluster.yaml
+	KUBECONFIG=$(MGMT_KUBECONFIG) kubectl apply -f cluster-api/addons.yaml
 
 wait-ready:
 	@echo "==> Waiting for kubeconfig secret (server provisioning + Talos bootstrap)..."
@@ -163,7 +163,7 @@ pivot:
 	@if [ -z "$$HCLOUD_TOKEN" ]; then echo "Error: HCLOUD_TOKEN not set"; exit 1; fi
 	@echo "    Installing CAPI providers on workload cluster..."
 	KUBECONFIG=$(WL_KUBECONFIG) clusterctl init \
-		--config manifests/clusterctl.yaml \
+		--config cluster-api/clusterctl.yaml \
 		--core cluster-api:$(CAPI_VERSION) \
 		--bootstrap talos:$(CABPT_VERSION) \
 		--control-plane talos:$(CACPPT_VERSION) \

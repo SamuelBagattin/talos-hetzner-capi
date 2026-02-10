@@ -114,9 +114,20 @@ kratos:
     enabled: false
     nameOverride: kratos-secrets
 
+  replicaCount: 2
+
   # CX23 resource constraints
   deployment:
     environmentSecretsName: kratos-secrets
+    affinity:
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: kratos
+              topologyKey: kubernetes.io/hostname
     resources:
       requests:
         cpu: 50m

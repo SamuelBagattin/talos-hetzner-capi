@@ -1,0 +1,27 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: argocd-selfsigned
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: talos-hetzner-capi
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: argocd-server-tls
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: talos-hetzner-capi
+spec:
+  secretName: argocd-server-tls
+  issuerRef:
+    name: argocd-selfsigned
+    kind: Issuer
+  dnsNames:
+    - argocd-server
+    - argocd-server.argocd
+    - argocd-server.argocd.svc
+    - argocd-server.argocd.svc.cluster.local

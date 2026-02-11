@@ -1,10 +1,10 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: capi-providers
+  name: cabpt
   namespace: argocd
   labels:
-    app.kubernetes.io/name: capi-providers
+    app.kubernetes.io/name: cabpt
     app.kubernetes.io/part-of: talos-hetzner-capi
     app.kubernetes.io/managed-by: argocd
 spec:
@@ -12,7 +12,7 @@ spec:
   source:
     repoURL: https://github.com/samuelbagattin/talos-hetzner-capi.git
     targetRevision: HEAD
-    path: capi-providers
+    path: capi-providers/cabpt
   destination:
     server: https://kubernetes.default.svc
   syncPolicy:

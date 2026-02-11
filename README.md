@@ -69,10 +69,12 @@ Hetzner Cloud — nbg1 (Nuremberg)
 |       ├── :443  → HTTPS (*.cluster.samuelbagattin.com)               |
 |       └── :80   → HTTP redirect                                     |
 |                                                                      |
-|  Private Network: 10.10.0.0/16                                       |
-|  ├── Subnet:  10.10.64.0/25   (etcd peer communication)             |
-|  ├── Pods:    10.10.128.0/17                                         |
-|  └── Services:10.10.96.0/20                                         |
+|  Hetzner Private Network: 10.10.0.0/16                               |
+|  └── Subnet: 10.10.64.0/25  (node IPs, etcd peer communication)     |
+|                                                                      |
+|  Cilium VXLAN Overlay                                                |
+|  ├── Pods:     10.10.128.0/17                                        |
+|  └── Services: 10.10.96.0/20                                        |
 |                                                                      |
 |  Placement Group (spread)                                            |
 |  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐                 |
@@ -177,11 +179,17 @@ kubectl apply -k argocd/install/
 # Apply encrypted secrets (requires SOPS age key)
 sops -d argocd/secrets/secrets.sops.yaml | kubectl apply -f -
 
-# Apply ArgoCD applications (self-management, CAPI, platform)
+# Activate self-management — this single command closes the loop
 kubectl apply -f argocd/apps/
 ```
 
-From this point, ArgoCD takes over. All further changes are made via `git push`.
+That last `kubectl apply` is the moment everything becomes self-managing. It applies three Application manifests that together bootstrap the entire system:
+
+1. **`argocd-self.yaml`** — ArgoCD starts reconciling its own installation from `argocd/install/` (Kustomize). From now on, ArgoCD config changes are made via git, not kubectl.
+2. **`cluster-api.yaml`** — ArgoCD takes ownership of the CAPI manifests in `cluster-api/`. The `Cluster`, `HetznerCluster`, and `TalosControlPlane` specs are now continuously synced from git — any change (like a Kubernetes version bump) is automatically applied by ArgoCD, which triggers CAPI to reconcile the infrastructure.
+3. **`platform-appset.yaml`** — The ApplicationSet scans `argocd/applications/*/*` and dynamically creates an ArgoCD Application for each directory. Every platform component (Cilium, identity stack, observability, etc.) is deployed and kept in sync.
+
+From this point on, all changes are made via `git push`.
 
 ## Rolling Kubernetes Upgrade
 

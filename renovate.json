@@ -11,10 +11,11 @@
   "customManagers": [
     {
       "customType": "regex",
-      "description": "Raw GitHub content URLs in Kustomize",
+      "description": "GitHub URLs in Kustomize (raw content and release downloads)",
       "fileMatch": ["kustomization\\.ya?ml$"],
       "matchStrings": [
-        "https://raw\\.githubusercontent\\.com/(?<depName>[^/]+/[^/]+)/(?<currentValue>[^/]+)/"
+        "https://raw\\.githubusercontent\\.com/(?<depName>[^/]+/[^/]+)/(?<currentValue>[^/]+)/",
+        "github\\.com/(?<depName>[^/]+/[^/]+)/releases/download/(?<currentValue>[^/]+)/"
       ],
       "datasourceTemplate": "github-releases"
     },

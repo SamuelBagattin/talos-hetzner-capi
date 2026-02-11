@@ -1,8 +1,0 @@
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-resources:
-  - https://github.com/syself/cluster-api-provider-hetzner//config/default?ref=v1.0.7
-images:
-  - name: controller
-    newName: ghcr.io/syself/caph
-    newTag: v1.0.7

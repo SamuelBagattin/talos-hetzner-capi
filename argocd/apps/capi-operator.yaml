@@ -1,0 +1,52 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: capi-operator
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: capi-operator
+    app.kubernetes.io/part-of: talos-hetzner-capi
+    app.kubernetes.io/managed-by: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://kubernetes-sigs.github.io/cluster-api-operator
+    chart: cluster-api-operator
+    targetRevision: "0.25.0"
+    helm:
+      valuesObject:
+        core:
+          cluster-api:
+            # renovate: datasource=github-releases depName=kubernetes-sigs/cluster-api
+            version: v1.12.2
+            namespace: capi-system
+        bootstrap:
+          talos:
+            # renovate: datasource=github-releases depName=siderolabs/cluster-api-bootstrap-provider-talos
+            version: v0.6.11
+            namespace: cabpt-system
+        controlPlane:
+          talos:
+            # renovate: datasource=github-releases depName=siderolabs/cluster-api-control-plane-provider-talos
+            version: v0.5.12
+            namespace: cacppt-system
+        infrastructure:
+          hetzner:
+            # renovate: datasource=github-releases depName=syself/cluster-api-provider-hetzner
+            version: v1.0.7
+            namespace: caph-system
+        addon:
+          helm:
+            # renovate: datasource=github-releases depName=kubernetes-sigs/cluster-api-addon-provider-helm
+            version: v0.6.0
+            namespace: caaph-system
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: capi-operator-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

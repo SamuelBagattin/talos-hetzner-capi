@@ -53,6 +53,14 @@
       "matchStrings": [
         "# renovate: datasource=(?<datasource>[^\\s]+) depName=(?<depName>[^\\s]+)\\n\\w+\\s+\\?=\\s+(?<currentValue>\\S+)"
       ]
+    },
+    {
+      "customType": "regex",
+      "description": "Annotated versions in YAML files",
+      "fileMatch": ["\\.ya?ml$"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>[^\\s]+) depName=(?<depName>[^\\s]+)\\n\\s+version:\\s+(?<currentValue>\\S+)"
+      ]
     }
   ]
 }

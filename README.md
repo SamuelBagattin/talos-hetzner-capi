@@ -8,41 +8,25 @@ A fully self-managing Kubernetes cluster on Hetzner Cloud, built with [Talos Lin
 
 The cluster sustains itself through two reconciliation loops:
 
-```
-                          git push
-                             |
-                             v
-                    +--------+--------+
-                    |    GitHub Repo   |
-                    +--------+--------+
-                             |
-              +--------------+--------------+
-              |                             |
-              v                             v
-     +--------+--------+          +--------+--------+
-     |     ArgoCD       |          |     ArgoCD       |
-     | (self-managing)  |          |  ApplicationSet  |
-     +--------+--------+          +--------+--------+
-              |                             |
-              v                             v
-     argocd/install/              argocd/applications/*/*
-     (Kustomize)                  (Helm charts)
-                                            |
-              +-----------------------------+-----------------------------+
-              |              |              |              |              |
-              v              v              v              v              v
-         cluster-api/    identity/     observability/  envoy-gateway/   ...
-         (CAPI specs)    (Ory stack)   (VM + OTel)    (Gateway API)
-              |
-              v
-     +--------+--------+
-     |   Cluster API    |
-     |   Controllers    |
-     +--------+--------+
-              |
-              v
-     Hetzner Cloud API
-     (servers, LBs, networks)
+```mermaid
+graph TD
+    push["git push"] --> repo["GitHub Repo"]
+
+    repo --> argocd_self["ArgoCD<br/><i>self-managing</i>"]
+    repo --> argocd_appset["ArgoCD<br/><i>ApplicationSet</i>"]
+    repo --> argocd_capi["ArgoCD<br/><i>cluster-api app</i>"]
+
+    argocd_self --> |"syncs"| install["argocd/install/<br/>(Kustomize)"]
+    argocd_capi --> |"syncs"| capi_specs["cluster-api/<br/>(CAPI specs)"]
+    argocd_appset --> |"discovers & syncs"| apps["argocd/applications/*/*<br/>(Helm charts)"]
+
+    apps --> identity["Identity<br/>(Ory stack)"]
+    apps --> observability["Observability<br/>(VM + OTel)"]
+    apps --> envoy["Envoy Gateway<br/>(Gateway API)"]
+    apps --> others["..."]
+
+    capi_specs --> capi["Cluster API<br/>Controllers"]
+    capi --> hetzner["Hetzner Cloud API<br/>(servers, LBs, networks)"]
 ```
 
 **ArgoCD** syncs three top-level applications from this repo:
@@ -58,33 +42,29 @@ This is what makes `git push` = full cluster upgrade possible.
 
 ### Infrastructure
 
-```
-Hetzner Cloud — nbg1 (Nuremberg)
-+----------------------------------------------------------------------+
-|                                                                      |
-|  Load Balancer (lb11)                                                |
-|  ├── :6443  → Control Plane (Kubernetes API)                         |
-|  ├── :50000 → Control Plane (Talos API)                              |
-|  └── Envoy LB (auto-provisioned by Gateway API)                     |
-|       ├── :443  → HTTPS (*.cluster.samuelbagattin.com)               |
-|       └── :80   → HTTP redirect                                     |
-|                                                                      |
-|  Hetzner Private Network: 10.10.0.0/16                               |
-|  └── Subnet: 10.10.64.0/25  (node IPs, etcd peer communication)     |
-|                                                                      |
-|  Cilium VXLAN Overlay                                                |
-|  ├── Pods:     10.10.128.0/17                                        |
-|  └── Services: 10.10.96.0/20                                        |
-|                                                                      |
-|  Placement Group (spread)                                            |
-|  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐                 |
-|  │  CP Node 1   │ │  CP Node 2   │ │  CP Node 3   │                 |
-|  │  cx33         │ │  cx33         │ │  cx33         │                 |
-|  │  Talos v1.12  │ │  Talos v1.12  │ │  Talos v1.12  │                 |
-|  │  K8s v1.35    │ │  K8s v1.35    │ │  K8s v1.35    │                 |
-|  └──────────────┘ └──────────────┘ └──────────────┘                 |
-|                                                                      |
-+----------------------------------------------------------------------+
+```mermaid
+graph TD
+    subgraph hetzner["Hetzner Cloud — nbg1 (Nuremberg)"]
+        subgraph lb["Load Balancers"]
+            cplb[":6443 → Kubernetes API<br/>:50000 → Talos API<br/><i>lb11</i>"]
+            envoylb[":443 → HTTPS *.cluster.samuelbagattin.com<br/>:80 → HTTP redirect<br/><i>auto-provisioned by Gateway API</i>"]
+        end
+
+        subgraph network["Networking"]
+            privnet["Hetzner Private Network: 10.10.0.0/16<br/>Subnet: 10.10.64.0/25 (node IPs, etcd peers)"]
+            overlay["Cilium VXLAN Overlay<br/>Pods: 10.10.128.0/17<br/>Services: 10.10.96.0/20"]
+        end
+
+        subgraph nodes["Placement Group (spread)"]
+            node1["CP Node 1<br/>cx33 · Talos v1.12 · K8s v1.35"]
+            node2["CP Node 2<br/>cx33 · Talos v1.12 · K8s v1.35"]
+            node3["CP Node 3<br/>cx33 · Talos v1.12 · K8s v1.35"]
+        end
+
+        cplb --> node1 & node2 & node3
+        envoylb --> node1 & node2 & node3
+        privnet -.-> node1 & node2 & node3
+    end
 ```
 
 This is a **control-plane-only cluster** — all 3 nodes are control-plane members with `allowSchedulingOnControlPlanes: true`. There are no dedicated workers. All workloads (ArgoCD, identity, observability, etc.) schedule directly on the control-plane nodes.
@@ -123,16 +103,14 @@ This is a **control-plane-only cluster** — all 3 nodes are control-plane membe
 
 The cluster starts from nothing and reaches full self-management in 4 phases:
 
-```
-Phase 1: Bootstrap          Phase 2: Provision         Phase 3: Pivot            Phase 4: Self-Managed
-┌─────────────────┐        ┌─────────────────┐        ┌─────────────────┐        ┌─────────────────┐
-│  Local Machine   │        │  Kind manages    │        │  CAPI resources  │        │  Cluster manages │
-│                  │        │  Hetzner servers │        │  move to the     │        │  itself via      │
-│  kind cluster    │───────>│  via CAPI        │───────>│  workload        │───────>│  CAPI + ArgoCD   │
-│  + CAPI providers│        │                  │        │  cluster         │        │                  │
-│                  │        │  CAAPH installs  │        │  Kind deleted    │        │  git push =      │
-│                  │        │  Cilium, CCMs    │        │                  │        │  cluster upgrade  │
-└─────────────────┘        └─────────────────┘        └─────────────────┘        └─────────────────┘
+```mermaid
+graph LR
+    p1["Phase 1: Bootstrap<br/><br/>Local machine<br/>Kind cluster<br/>+ CAPI providers"]
+    p2["Phase 2: Provision<br/><br/>Kind manages<br/>Hetzner servers via CAPI<br/>CAAPH installs Cilium, CCMs"]
+    p3["Phase 3: Pivot<br/><br/>CAPI resources move<br/>to the workload cluster<br/>Kind deleted"]
+    p4["Phase 4: Self-Managed<br/><br/>Cluster manages itself<br/>via CAPI + ArgoCD<br/><b>git push = cluster upgrade</b>"]
+
+    p1 --> p2 --> p3 --> p4
 ```
 
 ### Prerequisites

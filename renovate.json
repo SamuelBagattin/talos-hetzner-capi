@@ -4,5 +4,8 @@
     "config:recommended",
     ":automergeAll"
   ],
-  "ignoreTests": true
+  "ignoreTests": true,
+  "prHourlyLimit": 0,
+  "prConcurrentLimit": 0,
+  "branchConcurrentLimit": 0
 }

@@ -26,7 +26,7 @@ CABPT_VERSION   ?= v0.6.11
 # renovate: datasource=github-releases depName=siderolabs/cluster-api-control-plane-provider-talos
 CACPPT_VERSION  ?= v0.5.12
 # renovate: datasource=github-releases depName=kubernetes-sigs/cluster-api-addon-provider-helm
-CAAPH_VERSION   ?= v0.4.2
+CAAPH_VERSION   ?= v0.6.0
 
 # Output paths
 MGMT_KUBECONFIG ?= /tmp/$(CLUSTER_NAME)-mgmt.kubeconfig

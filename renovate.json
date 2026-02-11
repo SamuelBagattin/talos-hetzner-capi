@@ -11,11 +11,48 @@
   "customManagers": [
     {
       "customType": "regex",
+      "description": "Raw GitHub content URLs in Kustomize",
       "fileMatch": ["kustomization\\.ya?ml$"],
       "matchStrings": [
         "https://raw\\.githubusercontent\\.com/(?<depName>[^/]+/[^/]+)/(?<currentValue>[^/]+)/"
       ],
       "datasourceTemplate": "github-releases"
+    },
+    {
+      "customType": "regex",
+      "description": "HelmChartProxy HTTPS chart versions",
+      "fileMatch": ["cluster-api/addons\\.yaml$"],
+      "matchStrings": [
+        "repoURL:\\s+(?<registryUrl>https://[^\\s]+)\\n\\s+chartName:\\s+(?<depName>[^\\s]+)\\n\\s+version:\\s+(?<currentValue>[^\\s]+)"
+      ],
+      "datasourceTemplate": "helm"
+    },
+    {
+      "customType": "regex",
+      "description": "HelmChartProxy OCI chart versions",
+      "fileMatch": ["cluster-api/addons\\.yaml$"],
+      "matchStrings": [
+        "repoURL:\\s+oci://(?<registryUrl>[^\\s]+)\\n\\s+chartName:\\s+(?<depName>[^\\s]+)\\n\\s+version:\\s+(?<currentValue>[^\\s]+)"
+      ],
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "{{{registryUrl}}}/{{{depName}}}"
+    },
+    {
+      "customType": "regex",
+      "description": "Pinned GitHub release URLs in clusterctl.yaml",
+      "fileMatch": ["clusterctl\\.yaml$"],
+      "matchStrings": [
+        "github\\.com/(?<depName>[^/]+/[^/]+)/releases/(?<currentValue>v\\d[^/]*)/"
+      ],
+      "datasourceTemplate": "github-releases"
+    },
+    {
+      "customType": "regex",
+      "description": "Annotated versions in Makefile",
+      "fileMatch": ["Makefile$"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>[^\\s]+) depName=(?<depName>[^\\s]+)\\n\\w+\\s+\\?=\\s+(?<currentValue>\\S+)"
+      ]
     }
   ]
 }

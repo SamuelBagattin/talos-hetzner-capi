@@ -17,10 +17,15 @@ K8S_VERSION     ?= v1.35.0
 LOCATION        ?= nbg1
 
 # CAPI provider versions
+# renovate: datasource=github-releases depName=kubernetes-sigs/cluster-api
 CAPI_VERSION    ?= v1.10.10
+# renovate: datasource=github-releases depName=syself/cluster-api-provider-hetzner
 CAPH_VERSION    ?= v1.0.7
+# renovate: datasource=github-releases depName=siderolabs/cluster-api-bootstrap-provider-talos
 CABPT_VERSION   ?= v0.6.11
+# renovate: datasource=github-releases depName=siderolabs/cluster-api-control-plane-provider-talos
 CACPPT_VERSION  ?= v0.5.12
+# renovate: datasource=github-releases depName=kubernetes-sigs/cluster-api-addon-provider-helm
 CAAPH_VERSION   ?= v0.4.2
 
 # Output paths

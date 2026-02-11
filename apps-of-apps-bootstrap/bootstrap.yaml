@@ -1,10 +1,10 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: argocd
+  name: apps-of-apps
   namespace: argocd
   labels:
-    app.kubernetes.io/name: argocd
+    app.kubernetes.io/name: apps-of-apps
     app.kubernetes.io/part-of: talos-hetzner-capi
     app.kubernetes.io/managed-by: argocd
 spec:
@@ -12,7 +12,7 @@ spec:
   source:
     repoURL: https://github.com/samuelbagattin/talos-hetzner-capi.git
     targetRevision: HEAD
-    path: argocd/install
+    path: argocd/apps
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd

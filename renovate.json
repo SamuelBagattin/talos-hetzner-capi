@@ -7,5 +7,15 @@
   "ignoreTests": true,
   "prHourlyLimit": 0,
   "prConcurrentLimit": 0,
-  "branchConcurrentLimit": 0
+  "branchConcurrentLimit": 0,
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["kustomization\\.ya?ml$"],
+      "matchStrings": [
+        "https://raw\\.githubusercontent\\.com/(?<depName>[^/]+/[^/]+)/(?<currentValue>[^/]+)/"
+      ],
+      "datasourceTemplate": "github-releases"
+    }
+  ]
 }

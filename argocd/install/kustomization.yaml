@@ -4,7 +4,7 @@ kind: Kustomization
 namespace: argocd
 
 resources:
-  - https://github.com/argoproj/argo-cd//manifests/install.yaml?ref=v3.2.6
+  - https://raw.githubusercontent.com/argoproj/argo-cd/v3.2.6/manifests/install.yaml
   - routes/httproute.yaml
   - routes/grpcroute.yaml
   - routes/networkpolicy.yaml

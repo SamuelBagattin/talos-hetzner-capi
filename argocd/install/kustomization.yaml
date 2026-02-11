@@ -7,6 +7,7 @@ resources:
   - https://raw.githubusercontent.com/argoproj/argo-cd/v3.3.0/manifests/install.yaml
   - routes/httproute.yaml
   - routes/grpcroute.yaml
+  - routes/backend-tls-policy.yaml
   - routes/networkpolicy.yaml
 
 patches:

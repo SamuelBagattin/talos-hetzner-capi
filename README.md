@@ -63,9 +63,9 @@ flowchart TD
         end
 
         subgraph nodes["Placement Group — spread"]
-            node1["<b>CP Node 1</b><br/>cx33 · Talos v1.12 · K8s v1.35"]:::nodeStyle
-            node2["<b>CP Node 2</b><br/>cx33 · Talos v1.12 · K8s v1.35"]:::nodeStyle
-            node3["<b>CP Node 3</b><br/>cx33 · Talos v1.12 · K8s v1.35"]:::nodeStyle
+            node1["<b>CP Node 1</b><br/>cx33 · Talos · K8s"]:::nodeStyle
+            node2["<b>CP Node 2</b><br/>cx33 · Talos · K8s"]:::nodeStyle
+            node3["<b>CP Node 3</b><br/>cx33 · Talos · K8s"]:::nodeStyle
         end
     end
 
@@ -79,10 +79,10 @@ This is a **control-plane-only cluster** — all 3 nodes are control-plane membe
 
 | Layer | Component | Purpose |
 |---|---|---|
-| **OS** | Talos Linux v1.12.2 | Immutable, API-managed OS. No SSH, no shell, no package manager. |
-| **Kubernetes** | v1.35.0 | 3-node control plane, external cloud provider |
-| **CNI** | Cilium v1.19.0 | eBPF networking, kube-proxy replacement, Hubble observability |
-| **Ingress** | Envoy Gateway v1.6.3 | Gateway API implementation, TLS termination via cert-manager |
+| **OS** | Talos Linux | Immutable, API-managed OS. No SSH, no shell, no package manager. |
+| **Kubernetes** | Kubernetes | 3-node control plane, external cloud provider |
+| **CNI** | Cilium | eBPF networking, kube-proxy replacement, Hubble observability |
+| **Ingress** | Envoy Gateway | Gateway API implementation, TLS termination via cert-manager |
 | **Certificates** | cert-manager | Let's Encrypt via Cloudflare DNS-01 challenge |
 | **Identity** | Ory Hydra + Kratos | OAuth 2.0 / OIDC provider + self-service identity management |
 | **Database** | CloudNativePG | PostgreSQL (2 replicas), shared by Hydra, Kratos, and Grafana |
@@ -91,8 +91,8 @@ This is a **control-plane-only cluster** — all 3 nodes are control-plane membe
 | **Traces** | OpenTelemetry Collector | Distributed tracing pipeline via OTel Operator |
 | **Dashboards** | Grafana | Visualization, backed by PostgreSQL, OIDC-authenticated |
 | **Image distribution** | Spegel | Peer-to-peer container image sharing between nodes |
-| **Storage** | Hetzner CSI v2.18.3 | Dynamic PersistentVolume provisioning |
-| **GitOps** | ArgoCD v3.2.6 | Self-managing, OIDC-authenticated, ApplicationSet-driven |
+| **Storage** | Hetzner CSI | Dynamic PersistentVolume provisioning |
+| **GitOps** | ArgoCD | Self-managing, OIDC-authenticated, ApplicationSet-driven |
 | **Secrets** | SOPS + age | Git-encrypted secrets, decrypted by ArgoCD at sync time |
 
 ### Exposed Applications
@@ -109,13 +109,13 @@ All applications are served via Envoy Gateway under `*.cluster.samuelbagattin.co
 
 ### Cluster API Providers
 
-| Provider | Version | Role |
-|---|---|---|
-| CAPI Core | v1.10.10 | Cluster lifecycle orchestration |
-| CAPH | v1.0.7 | Hetzner Cloud infrastructure (servers, LBs, networks) |
-| CABPT | v0.6.11 | Talos bootstrap configuration generation |
-| CACPPT | v0.5.12 | Talos control plane management (rolling updates) |
-| CAAPH | v0.4.2 | Helm-based addon installation on workload clusters |
+| Provider | Role |
+|---|---|
+| CAPI Core | Cluster lifecycle orchestration |
+| CAPH | Hetzner Cloud infrastructure (servers, LBs, networks) |
+| CABPT | Talos bootstrap configuration generation |
+| CACPPT | Talos control plane management (rolling updates) |
+| CAAPH | Helm-based addon installation on workload clusters |
 
 ## Bootstrap Process
 
@@ -139,11 +139,8 @@ flowchart LR
 ### Prerequisites
 
 ```bash
-brew install kind helm packer kubectl
+brew install kind helm packer kubectl clusterctl
 brew install siderolabs/tap/talosctl
-# Install clusterctl v1.10.10
-curl -L https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.10.10/clusterctl-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m) \
-  -o /usr/local/bin/clusterctl && chmod +x /usr/local/bin/clusterctl
 ```
 
 ### Steps
@@ -196,12 +193,7 @@ From this point on, all changes are made via `git push`.
 
 To upgrade Kubernetes across the entire cluster:
 
-1. Update the version in `cluster-api/cluster.yaml`:
-   ```yaml
-   # TalosControlPlane
-   spec:
-     version: v1.36.0  # was v1.35.0
-   ```
+1. Update the Kubernetes version in `cluster-api/cluster.yaml` (`TalosControlPlane.spec.version`)
 2. Update the Talos image if needed in the `HCloudMachineTemplate`
 3. `git push`
 
@@ -212,7 +204,7 @@ ArgoCD syncs the change → CAPI detects the spec drift → rolling update begin
 - Repeat for each remaining old node
 - Cluster is now fully upgraded on the new version
 
-This has been tested through upgrades from v1.32.2 → v1.33.7 → v1.34.3 → v1.35.0.
+This has been tested through multiple successive Kubernetes minor version upgrades.
 
 ## Project Structure
 

@@ -68,7 +68,7 @@ spec:
       ccm: hcloud
   repoURL: https://charts.hetzner.cloud
   chartName: hcloud-cloud-controller-manager
-  version: 1.29.2
+  version: 1.30.0
   namespace: kube-system
   releaseName: hcloud-ccm
   valuesTemplate: |

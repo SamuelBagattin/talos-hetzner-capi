@@ -1,13 +1,13 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-# CAPI controller operators — installed by clusterctl during bootstrap,
+# CAPI controller operators — previously installed by clusterctl during bootstrap,
 # now managed by ArgoCD so they can be upgraded via git push.
-# Each URL points to a pre-built release manifest containing
-# CRDs, RBAC, Deployments, and Webhooks for that provider.
+# Each subdirectory references the upstream provider's config/default with
+# image overrides to pin the correct release image.
 resources:
-  - https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.10.10/core-components.yaml
-  - https://github.com/syself/cluster-api-provider-hetzner/releases/download/v1.0.7/infrastructure-components.yaml
-  - https://github.com/siderolabs/cluster-api-bootstrap-provider-talos/releases/download/v0.6.11/bootstrap-components.yaml
-  - https://github.com/siderolabs/cluster-api-control-plane-provider-talos/releases/download/v0.5.12/control-plane-components.yaml
-  - https://github.com/kubernetes-sigs/cluster-api-addon-provider-helm/releases/download/v0.4.2/addon-components.yaml
+  - capi-core
+  - caph
+  - cabpt
+  - cacppt
+  - caaph

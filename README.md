@@ -54,18 +54,12 @@ This is what makes `git push` = full cluster upgrade possible.
 ```mermaid
 flowchart TD
     classDef lbStyle fill:#fff3cd,stroke:#856404,stroke-width:2px,color:#000
-    classDef netStyle fill:#cfe2ff,stroke:#084298,stroke-width:2px,color:#000
     classDef nodeStyle fill:#d1e7dd,stroke:#0f5132,stroke-width:2px,color:#000
 
     subgraph hetzner["Hetzner Cloud — nbg1"]
         subgraph lb["Load Balancers"]
             cplb[":6443 Kubernetes API · :50000 Talos API"]:::lbStyle
             envoylb[":443 HTTPS · :80 HTTP redirect<br/><i>*.cluster.samuelbagattin.com</i>"]:::lbStyle
-        end
-
-        subgraph network["Networking"]
-            privnet["<b>Hetzner Private Network</b><br/>10.10.0.0/16 — Subnet 10.10.64.0/25<br/><i>node IPs, etcd peers</i>"]:::netStyle
-            overlay["<b>Cilium VXLAN Overlay</b><br/>Pods 10.10.128.0/17 — Services 10.10.96.0/20"]:::netStyle
         end
 
         subgraph nodes["Placement Group — spread"]
@@ -77,7 +71,6 @@ flowchart TD
 
     cplb --> node1 & node2 & node3
     envoylb --> node1 & node2 & node3
-    privnet -.-> node1 & node2 & node3
 ```
 
 This is a **control-plane-only cluster** — all 3 nodes are control-plane members with `allowSchedulingOnControlPlanes: true`. There are no dedicated workers. All workloads (ArgoCD, identity, observability, etc.) schedule directly on the control-plane nodes.

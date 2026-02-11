@@ -1,8 +1,8 @@
 .idea/
 public/
 
-# Helm chart archives at repo root (leftover from helm dep build)
-/*.tgz
+# Helm chart dependency archives (fetched by ArgoCD / helm dep build)
+*.tgz
 
 # Packer
 packer/.packer.d/

@@ -95,6 +95,18 @@ This is a **control-plane-only cluster** — all 3 nodes are control-plane membe
 | **GitOps** | ArgoCD v3.2.6 | Self-managing, OIDC-authenticated, ApplicationSet-driven |
 | **Secrets** | SOPS + age | Git-encrypted secrets, decrypted by ArgoCD at sync time |
 
+### Exposed Applications
+
+All applications are served via Envoy Gateway under `*.cluster.samuelbagattin.com` with Let's Encrypt TLS.
+
+| Application | URL | Notes |
+|---|---|---|
+| ArgoCD | `https://argocd.cluster.samuelbagattin.com` | GitOps dashboard, OIDC-authenticated |
+| Grafana | `https://grafana.cluster.samuelbagattin.com` | Observability dashboards, OIDC-authenticated |
+| Ory Kratos UI | `https://id.cluster.samuelbagattin.com` | Self-service identity (login, registration) |
+| Ory Hydra | `https://auth.cluster.samuelbagattin.com` | OAuth 2.0 / OIDC provider — not user-facing, consumed by ArgoCD and Grafana for authentication |
+| Demo (podinfo) | `https://demo.cluster.samuelbagattin.com` | Simple test application |
+
 ### Cluster API Providers
 
 | Provider | Version | Role |

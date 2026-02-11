@@ -9,5 +9,5 @@ providers:
     url: "https://github.com/syself/cluster-api-provider-hetzner/releases/latest/infrastructure-components.yaml"
     type: "InfrastructureProvider"
   - name: "helm"
-    url: "https://github.com/kubernetes-sigs/cluster-api-addon-provider-helm/releases/v0.4.2/addon-components.yaml"
+    url: "https://github.com/kubernetes-sigs/cluster-api-addon-provider-helm/releases/v0.6.0/addon-components.yaml"
     type: "AddonProvider"

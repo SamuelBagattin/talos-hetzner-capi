@@ -6,6 +6,21 @@ victoria-metrics-k8s-stack:
   # which exceeds 63-char K8s Service name limit
   fullnameOverride: vm-stack
 
+  # --- VM Operator subchart ---
+  victoria-metrics-operator:
+    crds:
+      cleanup:
+        # Disable pre-delete cleanup hook — ArgoCD manages lifecycle.
+        # The default image tag derives from KubeVersion (v1.35) which
+        # doesn't match Docker Hub tags (v1.35.0), causing ImagePullBackOff.
+        enabled: false
+    admissionWebhooks:
+      certManager:
+        # Use cert-manager for webhook TLS instead of the built-in certgen
+        # hook. Prevents caBundle/secret drift since cert-manager manages
+        # the cert lifecycle and injects the CA automatically.
+        enabled: true
+
   # --- VMSingle: metrics storage ---
   vmsingle:
     spec:
@@ -44,6 +59,9 @@ victoria-metrics-k8s-stack:
 
   # --- Grafana: bundled with VM datasource auto-configured ---
   grafana:
+    # Static admin password — login form is disabled (OIDC only).
+    # Prevents secret drift from Helm's randAlphaNum on each render.
+    adminPassword: "admin"
     # PostgreSQL backend for persistent storage (dashboards, users, etc.)
     # Password injected from SOPS-encrypted secret in observability namespace
     envValueFrom:
@@ -77,7 +95,7 @@ victoria-metrics-k8s-stack:
         # OIDC via Ory Hydra
         enabled: true
         name: Hydra
-        client_id: 9fd04351-d147-44ca-8fa1-2fb518e66ff5
+        client_id: 73a77a14-f5d3-4963-a446-7ba99d656565
         scopes: openid profile email groups
         auth_url: https://auth.cluster.samuelbagattin.com/oauth2/auth
         token_url: https://auth.cluster.samuelbagattin.com/oauth2/token

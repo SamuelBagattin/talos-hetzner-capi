@@ -37,7 +37,7 @@ metadata:
   namespace: default
 spec:
   controlPlaneEndpoint:
-    host: ""  # Auto-populated by CAPH with the LB private IP
+    host: "91.98.3.27"
     port: 6443
   controlPlaneLoadBalancer:
     enabled: true

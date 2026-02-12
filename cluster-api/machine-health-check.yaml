@@ -11,14 +11,14 @@ metadata:
 spec:
   clusterName: k8s
   maxUnhealthy: 1
-  nodeStartupTimeout: 15m
+  nodeStartupTimeout: 15m0s
   selector:
     matchLabels:
       cluster.x-k8s.io/control-plane-name: k8s-control-plane
   unhealthyConditions:
     - type: Ready
       status: "False"
-      timeout: 5m
+      timeout: 5m0s
     - type: Ready
       status: Unknown
-      timeout: 5m
+      timeout: 5m0s

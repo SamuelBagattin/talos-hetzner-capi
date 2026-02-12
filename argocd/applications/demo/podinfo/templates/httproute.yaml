@@ -13,6 +13,12 @@ spec:
   hostnames:
     - {{ .Values.hostname | default "demo.example.com" | quote }}
   rules:
-    - backendRefs:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
         - name: {{ .Release.Name }}
           port: 9898
+          kind: Service
+          weight: 1

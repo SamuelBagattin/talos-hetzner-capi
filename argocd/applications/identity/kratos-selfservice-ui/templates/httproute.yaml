@@ -13,6 +13,12 @@ spec:
   hostnames:
     - {{ .Values.hostname | default "id.cluster.samuelbagattin.com" | quote }}
   rules:
-    - backendRefs:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
         - name: kratos-selfservice-ui
           port: 80
+          kind: Service
+          weight: 1

@@ -12,6 +12,12 @@ spec:
   hostnames:
     - argocd.cluster.samuelbagattin.com
   rules:
-    - backendRefs:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
         - name: argocd-server
           port: 443
+          kind: Service
+          weight: 1

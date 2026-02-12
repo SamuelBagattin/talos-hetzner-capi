@@ -13,6 +13,12 @@ spec:
   hostnames:
     - {{ .Values.hostname | default "kratos.cluster.samuelbagattin.com" | quote }}
   rules:
-    - backendRefs:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
         - name: kratos-public
           port: 80
+          kind: Service
+          weight: 1

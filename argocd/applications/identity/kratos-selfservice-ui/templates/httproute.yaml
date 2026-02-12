@@ -8,7 +8,9 @@ metadata:
     app.kubernetes.io/managed-by: argocd
 spec:
   parentRefs:
-    - name: envoy-gateway
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: envoy-gateway
       namespace: envoy-gateway-system
   hostnames:
     - {{ .Values.hostname | default "id.cluster.samuelbagattin.com" | quote }}
@@ -18,7 +20,8 @@ spec:
             type: PathPrefix
             value: /
       backendRefs:
-        - name: kratos-selfservice-ui
-          port: 80
+        - group: ""
           kind: Service
+          name: kratos-selfservice-ui
+          port: 80
           weight: 1

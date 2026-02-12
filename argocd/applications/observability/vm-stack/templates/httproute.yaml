@@ -8,7 +8,9 @@ metadata:
     app.kubernetes.io/managed-by: argocd
 spec:
   parentRefs:
-    - name: envoy-gateway
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: envoy-gateway
       namespace: envoy-gateway-system
   hostnames:
     - {{ .Values.grafanaHostname | default "grafana.cluster.samuelbagattin.com" | quote }}
@@ -18,7 +20,8 @@ spec:
             type: PathPrefix
             value: /
       backendRefs:
-        - name: {{ .Release.Name }}-grafana
-          port: 80
+        - group: ""
           kind: Service
+          name: {{ .Release.Name }}-grafana
+          port: 80
           weight: 1

@@ -1,0 +1,12 @@
+# ControlPlaneProvider for CACPPT (Cluster API Control Plane Provider Talos).
+# Managed here rather than by the capi-operator Helm chart because ArgoCD
+# treats the chart's sync-wave annotated resources as hooks, which can be
+# pruned and not recreated during self-heal. Declaring it as a regular
+# resource ensures it persists.
+apiVersion: operator.cluster.x-k8s.io/v1alpha2
+kind: ControlPlaneProvider
+metadata:
+  name: talos
+  namespace: cacppt-system
+spec:
+  version: v0.5.12

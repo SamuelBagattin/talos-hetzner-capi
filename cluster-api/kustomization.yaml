@@ -6,3 +6,4 @@ resources:
   - addons.yaml
   - machine-health-check.yaml
   - network-policies.yaml
+  - control-plane-provider.yaml

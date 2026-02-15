@@ -1,0 +1,108 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hydra-register-clients
+  annotations:
+    # Run after every ArgoCD sync to ensure clients exist with correct config
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 5
+  template:
+    metadata:
+      labels:
+        # Reuse hydra-maester network policy (allows egress to Hydra admin + DNS)
+        app.kubernetes.io/name: hydra-maester
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: register
+          image: curlimages/curl:8.12.1
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 32Mi
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -e
+              HYDRA_ADMIN="http://hydra-admin.identity.svc.cluster.local:4445"
+
+              echo "Waiting for Hydra admin API..."
+              until curl -sf "$HYDRA_ADMIN/health/ready" > /dev/null 2>&1; do sleep 2; done
+              echo "Hydra is ready"
+
+              # Upsert: try PUT (update), fall back to POST (create) on 404
+              register_client() {
+                local id="$1"
+                local payload="$2"
+
+                status=$(curl -s -o /dev/null -w "%{http_code}" \
+                  -X PUT "$HYDRA_ADMIN/admin/clients/$id" \
+                  -H "Content-Type: application/json" \
+                  -d "$payload")
+
+                if [ "$status" = "200" ]; then
+                  echo "Updated client: $id"
+                  return 0
+                fi
+
+                # Client doesn't exist — create it
+                status=$(curl -s -o /dev/null -w "%{http_code}" \
+                  -X POST "$HYDRA_ADMIN/admin/clients" \
+                  -H "Content-Type: application/json" \
+                  -d "$payload")
+
+                if [ "$status" = "201" ]; then
+                  echo "Created client: $id"
+                  return 0
+                fi
+
+                echo "Failed to register client $id (HTTP $status)"
+                return 1
+              }
+
+              register_client "argocd" '{
+                "client_id": "argocd",
+                "client_name": "ArgoCD",
+                "grant_types": ["authorization_code"],
+                "response_types": ["code"],
+                "scope": "openid profile email groups offline_access",
+                "token_endpoint_auth_method": "none",
+                "skip_consent": true,
+                "redirect_uris": [
+                  "https://argocd.{{ .Values.domain }}/auth/callback",
+                  "http://localhost:8085/auth/callback"
+                ]
+              }'
+
+              register_client "grafana" '{
+                "client_id": "grafana",
+                "client_name": "Grafana",
+                "grant_types": ["authorization_code"],
+                "response_types": ["code"],
+                "scope": "openid profile email groups",
+                "token_endpoint_auth_method": "none",
+                "skip_consent": true,
+                "redirect_uris": [
+                  "https://grafana.{{ .Values.domain }}/login/generic_oauth"
+                ]
+              }'
+
+              register_client "kubectl" '{
+                "client_id": "kubectl",
+                "client_name": "kubectl",
+                "grant_types": ["authorization_code"],
+                "response_types": ["code"],
+                "scope": "openid profile email groups",
+                "token_endpoint_auth_method": "none",
+                "skip_consent": true,
+                "redirect_uris": [
+                  "http://localhost:8000",
+                  "http://localhost:18000"
+                ]
+              }'
+
+              echo "All clients registered successfully"

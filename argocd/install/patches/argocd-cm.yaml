@@ -10,7 +10,7 @@ data:
   oidc.config: |
     name: Hydra
     issuer: https://auth.cluster.samuelbagattin.com/
-    clientID: c40d3fd1-58fa-4f63-afa7-c154e6a353dc
+    clientID: argocd
     requestedScopes:
       - openid
       - profile

@@ -95,7 +95,7 @@ victoria-metrics-k8s-stack:
         # OIDC via Ory Hydra
         enabled: true
         name: Hydra
-        client_id: 73a77a14-f5d3-4963-a446-7ba99d656565
+        client_id: grafana
         scopes: openid profile email groups
         auth_url: https://auth.cluster.samuelbagattin.com/oauth2/auth
         token_url: https://auth.cluster.samuelbagattin.com/oauth2/token

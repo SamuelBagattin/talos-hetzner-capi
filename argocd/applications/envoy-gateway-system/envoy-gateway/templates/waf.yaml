@@ -1,7 +1,8 @@
 ---
 # Coraza WAF via proxy-wasm — applies to all traffic through the Gateway.
-# Starts in DetectionOnly mode: logs violations without blocking.
-# Switch SecRuleEngine to "On" after tuning false positives.
+# Uses per_authority_directives to apply tuned rulesets per hostname:
+# - gRPC services (ArgoCD, Hydra) get rule exclusions for binary protobuf
+# - All other traffic gets the full OWASP CRS
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: EnvoyExtensionPolicy
 metadata:
@@ -21,10 +22,25 @@ spec:
       failOpen: {{ .Values.waf.failOpen }}
       config:
         directives_map:
+          # Full OWASP CRS — applied to all HTTP traffic by default
           default:
             - "Include @recommended-conf"
             - "SecRuleEngine {{ .Values.waf.ruleEngine }}"
             - "SecDebugLogLevel 3"
             - "Include @crs-setup-conf"
             - "Include @owasp_crs/*.conf"
+          # Tuned ruleset for gRPC services (binary protobuf triggers false positives)
+          # Excludes: 920420 (content-type), 920270 (null chars), 921150 (CRLF in body)
+          grpc:
+            - "Include @recommended-conf"
+            - "SecRuleEngine {{ .Values.waf.ruleEngine }}"
+            - "SecDebugLogLevel 3"
+            - "Include @crs-setup-conf"
+            - "SecRuleRemoveById 920420"
+            - "SecRuleRemoveById 920270"
+            - "SecRuleRemoveById 921150"
+            - "Include @owasp_crs/*.conf"
         default_directives: "default"
+        per_authority_directives:
+          argocd.cluster.samuelbagattin.com: "grpc"
+          auth.cluster.samuelbagattin.com: "grpc"

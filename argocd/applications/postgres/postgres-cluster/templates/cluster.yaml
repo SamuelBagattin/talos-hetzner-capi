@@ -29,11 +29,9 @@ spec:
   managed:
     roles:
       {{- range $i, $db := .Values.databases }}
-      {{- if gt $i 0 }}
       - name: {{ $db.owner }}
         login: true
         ensure: present
         passwordSecret:
           name: {{ $db.owner }}-db-password
-      {{- end }}
       {{- end }}

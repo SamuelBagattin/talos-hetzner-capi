@@ -8,5 +8,7 @@ waf:
   version: "0.6.0"
   # DetectionOnly = log without blocking; On = enforce blocking
   ruleEngine: "On"
+  # SHA256 of the WASM binary (from GitHub release)
+  sha256: "f36e710529167482df820b790981230092da098d26d21aebb16f1d9c8c4e26d5"
   # failOpen: allow traffic through if the WASM filter fails to load/execute
   failOpen: true

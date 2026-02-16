@@ -47,3 +47,34 @@ spec:
         - ports:
             - port: "443"
               protocol: TCP
+---
+# Allow Coraza WASM server: init container downloads from GitHub,
+# proxy pods fetch the binary via HTTP.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: coraza-wasm-server
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: coraza-wasm-server
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: envoy
+            app.kubernetes.io/component: proxy
+            app.kubernetes.io/managed-by: envoy-gateway
+    - fromEndpoints:
+        - matchLabels:
+            control-plane: envoy-gateway
+  egress:
+    # Init container needs to download from GitHub
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+    # DNS resolution
+    - toEntities:
+        - cluster

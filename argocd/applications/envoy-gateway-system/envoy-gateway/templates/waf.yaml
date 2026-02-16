@@ -16,9 +16,10 @@ spec:
   wasm:
     - name: coraza-filter
       code:
-        type: Image
-        image:
-          url: ghcr.io/corazawaf/coraza-proxy-wasm:{{ .Values.waf.version }}
+        type: HTTP
+        http:
+          url: http://coraza-wasm-server.envoy-gateway-system.svc.cluster.local/coraza-proxy-wasm.wasm
+          sha256: {{ .Values.waf.sha256 }}
       failOpen: {{ .Values.waf.failOpen }}
       config:
         directives_map:
@@ -36,10 +37,10 @@ spec:
             - "SecRuleEngine {{ .Values.waf.ruleEngine }}"
             - "SecDebugLogLevel 3"
             - "Include @crs-setup-conf"
+            - "Include @owasp_crs/*.conf"
             - "SecRuleRemoveById 920420"
             - "SecRuleRemoveById 920270"
             - "SecRuleRemoveById 921150"
-            - "Include @owasp_crs/*.conf"
         default_directives: "default"
         per_authority_directives:
           argocd.cluster.samuelbagattin.com: "grpc"

@@ -41,7 +41,18 @@ spec:
             - "SecRuleRemoveById 920420"
             - "SecRuleRemoveById 920270"
             - "SecRuleRemoveById 921150"
+          # Tuned ruleset for Ory identity services (OIDC callbacks contain OAuth
+          # scopes like "profile" which trigger LFI rule 930120 false positive)
+          ory:
+            - "Include @recommended-conf"
+            - "SecRuleEngine {{ .Values.waf.ruleEngine }}"
+            - "SecDebugLogLevel 3"
+            - "Include @crs-setup-conf"
+            - "Include @owasp_crs/*.conf"
+            - "SecRuleRemoveById 930120"
         default_directives: "default"
         per_authority_directives:
           argocd.cluster.samuelbagattin.com: "grpc"
           auth.cluster.samuelbagattin.com: "grpc"
+          kratos.cluster.samuelbagattin.com: "ory"
+          id.cluster.samuelbagattin.com: "ory"

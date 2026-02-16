@@ -30,14 +30,16 @@ spec:
             - "SecDebugLogLevel 3"
             - "Include @crs-setup-conf"
             - "Include @owasp_crs/*.conf"
-          # Tuned ruleset for gRPC services (binary protobuf triggers false positives)
-          # Excludes: 920420 (content-type), 920270 (null chars), 921150 (CRLF in body)
+          # Tuned ruleset for gRPC + REST API services (ArgoCD, Hydra)
+          # Excludes: 911100 (DELETE/PUT/PATCH methods), 920420 (content-type),
+          #           920270 (null chars), 921150 (CRLF in body)
           grpc:
             - "Include @recommended-conf"
             - "SecRuleEngine {{ .Values.waf.ruleEngine }}"
             - "SecDebugLogLevel 3"
             - "Include @crs-setup-conf"
             - "Include @owasp_crs/*.conf"
+            - "SecRuleRemoveById 911100"
             - "SecRuleRemoveById 920420"
             - "SecRuleRemoveById 920270"
             - "SecRuleRemoveById 921150"

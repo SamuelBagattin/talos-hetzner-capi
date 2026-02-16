@@ -6,3 +6,6 @@ creation_rules:
     encrypted_regex: "^(data|stringData)$"
     age: >-
       age1667se0alfxv9ufepu2d782yva9sdjf6kuv4xskpmn3rmhyhepd9srtkljf
+  - path_regex: (kubeconfig|talosconfig)\.sops\.yaml$
+    age: >-
+      age1667se0alfxv9ufepu2d782yva9sdjf6kuv4xskpmn3rmhyhepd9srtkljf

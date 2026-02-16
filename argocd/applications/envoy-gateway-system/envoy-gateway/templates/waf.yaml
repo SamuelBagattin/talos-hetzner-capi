@@ -52,9 +52,19 @@ spec:
             - "Include @crs-setup-conf"
             - "Include @owasp_crs/*.conf"
             - "SecRuleRemoveById 930120"
+          # Tuned ruleset for Grafana — disable response body inspection to
+          # prevent Coraza WASM ProcessResponseBody bug causing HTTP/2 stream resets
+          grafana:
+            - "Include @recommended-conf"
+            - "SecRuleEngine {{ .Values.waf.ruleEngine }}"
+            - "SecDebugLogLevel 3"
+            - "SecResponseBodyAccess Off"
+            - "Include @crs-setup-conf"
+            - "Include @owasp_crs/*.conf"
         default_directives: "default"
         per_authority_directives:
           argocd.cluster.samuelbagattin.com: "grpc"
           auth.cluster.samuelbagattin.com: "grpc"
           kratos.cluster.samuelbagattin.com: "ory"
           id.cluster.samuelbagattin.com: "ory"
+          grafana.cluster.samuelbagattin.com: "grafana"

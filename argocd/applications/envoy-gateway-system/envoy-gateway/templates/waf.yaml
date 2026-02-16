@@ -1,0 +1,30 @@
+---
+# Coraza WAF via proxy-wasm — applies to all traffic through the Gateway.
+# Starts in DetectionOnly mode: logs violations without blocking.
+# Switch SecRuleEngine to "On" after tuning false positives.
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: EnvoyExtensionPolicy
+metadata:
+  name: coraza-waf
+  namespace: envoy-gateway-system
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: envoy-gateway
+  wasm:
+    - name: coraza-filter
+      code:
+        type: Image
+        image:
+          url: ghcr.io/corazawaf/coraza-proxy-wasm:{{ .Values.waf.version }}
+      failOpen: {{ .Values.waf.failOpen }}
+      config:
+        directives_map:
+          default:
+            - "Include @recommended-conf"
+            - "SecRuleEngine {{ .Values.waf.ruleEngine }}"
+            - "SecDebugLogLevel 3"
+            - "Include @crs-setup-conf"
+            - "Include @owasp_crs/*.conf"
+        default_directives: "default"

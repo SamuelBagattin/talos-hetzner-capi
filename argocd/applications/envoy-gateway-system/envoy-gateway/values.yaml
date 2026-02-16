@@ -1,3 +1,12 @@
 # Envoy Gateway controller configuration
 # Default access log format (JSON to stdout) is used — no override needed
 gateway-helm: {}
+
+# Coraza WAF (OWASP CRS via proxy-wasm)
+waf:
+  # renovate: datasource=docker depName=ghcr.io/corazawaf/coraza-proxy-wasm
+  version: "0.6.0"
+  # DetectionOnly = log without blocking; On = enforce blocking
+  ruleEngine: DetectionOnly
+  # failOpen: allow traffic through if the WASM filter fails to load/execute
+  failOpen: true

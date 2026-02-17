@@ -18,7 +18,7 @@ spec:
         core:
           cluster-api:
             # renovate: datasource=github-releases depName=kubernetes-sigs/cluster-api
-            version: v1.12.2
+            version: v1.12.3
             namespace: capi-system
         bootstrap:
           talos:

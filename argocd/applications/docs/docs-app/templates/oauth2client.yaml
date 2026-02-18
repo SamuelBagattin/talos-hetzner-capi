@@ -3,7 +3,7 @@ kind: OAuth2Client
 metadata:
   name: docs
   labels:
-    app.kubernetes.io/name: hydra-maester
+    app.kubernetes.io/name: docs
     app.kubernetes.io/part-of: talos-hetzner-capi
     app.kubernetes.io/managed-by: argocd
 spec:
@@ -16,4 +16,4 @@ spec:
   tokenEndpointAuthMethod: client_secret_post
   skipConsent: true
   redirectUris:
-    - "https://docs.{{ .Values.domain }}/oidc/callback/"
+    - "https://{{ .Values.hostname }}/oidc/callback/"

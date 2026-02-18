@@ -21,7 +21,7 @@ kratos:
                 "email": {
                   "type": "string",
                   "format": "email",
-                  "pattern": "(^samue\\.bagattin@gmail\\.com$|@samuelbagattin\\.com$)",
+                  "pattern": "(^samuel\\.bagattin@gmail\\.com$|@samuelbagattin\\.com$)",
                   "title": "Email",
                   "ory.sh/kratos": {
                     "credentials": { "password": { "identifier": true } },

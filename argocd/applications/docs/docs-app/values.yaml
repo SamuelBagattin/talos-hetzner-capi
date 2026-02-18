@@ -80,6 +80,11 @@ docs:
           key: COLLABORATION_SERVER_SECRET
       COLLABORATION_SERVER_URL: "https://docs.cluster.samuelbagattin.com/collaboration"
       FRONTEND_HOMEPAGE_FEATURE_ENABLED: "True"
+      DJANGO_SUPERUSER_EMAIL: "samuel@samuelbagattin.com"
+      DJANGO_SUPERUSER_PASSWORD:
+        secretKeyRef:
+          name: docs-secrets
+          key: DJANGO_SECRET_KEY
     probes:
       startup:
         path: /__lbheartbeat__

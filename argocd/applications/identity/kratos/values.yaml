@@ -21,7 +21,7 @@ kratos:
                 "email": {
                   "type": "string",
                   "format": "email",
-                  "pattern": "@samuelbagattin\\.com$",
+                  "pattern": "(^samue\\.bagattin@gmail\\.com$|@samuelbagattin\\.com$)",
                   "title": "Email",
                   "ory.sh/kratos": {
                     "credentials": { "password": { "identifier": true } },
@@ -57,6 +57,24 @@ kratos:
               },
             },
             [if claims.email_verified then "verified_addresses"]: [{
+              via: "email",
+              value: claims.email,
+            }],
+          },
+        }
+      "oidc.github.jsonnet": |
+        local claims = std.extVar('claims');
+
+        {
+          identity: {
+            traits: {
+              email: claims.email,
+              name: {
+                first: claims.name,
+                last: "",
+              },
+            },
+            verified_addresses: [{
               via: "email",
               value: claims.email,
             }],

@@ -60,11 +60,11 @@ docs:
       OIDC_RP_CLIENT_ID:
         secretKeyRef:
           name: oauth2-client-docs
-          key: client_id
+          key: CLIENT_ID
       OIDC_RP_CLIENT_SECRET:
         secretKeyRef:
           name: oauth2-client-docs
-          key: client_secret
+          key: CLIENT_SECRET
       OIDC_RP_SIGN_ALGO: "RS256"
       OIDC_CREATE_USER: "True"
       OIDC_REDIRECT_ALLOWED_HOSTS: "https://docs.cluster.samuelbagattin.com"

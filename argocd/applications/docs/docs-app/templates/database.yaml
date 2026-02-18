@@ -1,0 +1,15 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: docs
+  namespace: postgres
+  labels:
+    app.kubernetes.io/name: docs
+    app.kubernetes.io/part-of: talos-hetzner-capi
+    app.kubernetes.io/managed-by: argocd
+spec:
+  name: docs
+  owner: docs
+  cluster:
+    name: postgres-cluster
+  databaseReclaimPolicy: retain

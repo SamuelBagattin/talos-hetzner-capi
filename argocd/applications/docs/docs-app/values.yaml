@@ -1,0 +1,133 @@
+docs:
+  fullnameOverride: docs-app
+
+  # All ingresses disabled — replaced by HTTPRoute templates
+  ingress:
+    enabled: false
+  ingressCollaborationWS:
+    enabled: false
+  ingressCollaborationApi:
+    enabled: false
+  ingressAdmin:
+    enabled: false
+  ingressMedia:
+    enabled: false
+  ingressRedirects:
+    enabled: false
+
+  backend:
+    replicas: 1
+    pdb:
+      enabled: false
+    envVars:
+      DJANGO_CONFIGURATION: "Production"
+      DJANGO_ALLOWED_HOSTS: "docs.cluster.samuelbagattin.com"
+      DJANGO_CSRF_TRUSTED_ORIGINS: "https://docs.cluster.samuelbagattin.com"
+      DJANGO_EMAIL_BACKEND: "django.core.mail.backends.console.EmailBackend"
+      DB_HOST: "postgres-cluster-rw.postgres.svc.cluster.local"
+      DB_NAME: "docs"
+      DB_PORT: "5432"
+      DB_USER:
+        secretKeyRef:
+          name: docs-db-credentials
+          key: DB_USER
+      DB_PASSWORD:
+        secretKeyRef:
+          name: docs-db-credentials
+          key: DB_PASSWORD
+      REDIS_URL: "redis://redis:6379/1"
+      DJANGO_CELERY_BROKER_URL: "redis://redis:6379/0"
+      AWS_S3_ENDPOINT_URL:
+        secretKeyRef:
+          name: docs-s3-credentials
+          key: AWS_S3_ENDPOINT_URL
+      AWS_S3_ACCESS_KEY_ID:
+        secretKeyRef:
+          name: docs-s3-credentials
+          key: AWS_S3_ACCESS_KEY_ID
+      AWS_S3_SECRET_ACCESS_KEY:
+        secretKeyRef:
+          name: docs-s3-credentials
+          key: AWS_S3_SECRET_ACCESS_KEY
+      AWS_STORAGE_BUCKET_NAME:
+        secretKeyRef:
+          name: docs-s3-credentials
+          key: AWS_STORAGE_BUCKET_NAME
+      OIDC_OP_AUTHORIZATION_ENDPOINT: "https://auth.cluster.samuelbagattin.com/oauth2/auth"
+      OIDC_OP_TOKEN_ENDPOINT: "https://auth.cluster.samuelbagattin.com/oauth2/token"
+      OIDC_OP_USER_ENDPOINT: "https://auth.cluster.samuelbagattin.com/userinfo"
+      OIDC_OP_JWKS_ENDPOINT: "https://auth.cluster.samuelbagattin.com/.well-known/jwks.json"
+      OIDC_RP_CLIENT_ID:
+        secretKeyRef:
+          name: oauth2-client-docs
+          key: client_id
+      OIDC_RP_CLIENT_SECRET:
+        secretKeyRef:
+          name: oauth2-client-docs
+          key: client_secret
+      OIDC_RP_SIGN_ALGO: "RS256"
+      OIDC_CREATE_USER: "True"
+      OIDC_REDIRECT_ALLOWED_HOSTS: "https://docs.cluster.samuelbagattin.com"
+      LOGIN_REDIRECT_URL: "https://docs.cluster.samuelbagattin.com/"
+      LOGIN_REDIRECT_URL_FAILURE: "https://docs.cluster.samuelbagattin.com/"
+      DJANGO_SECRET_KEY:
+        secretKeyRef:
+          name: docs-secrets
+          key: DJANGO_SECRET_KEY
+      COLLABORATION_SERVER_SECRET:
+        secretKeyRef:
+          name: docs-secrets
+          key: COLLABORATION_SERVER_SECRET
+      COLLABORATION_SERVER_URL: "https://docs.cluster.samuelbagattin.com/collaboration"
+      FRONTEND_HOMEPAGE_FEATURE_ENABLED: "True"
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+    celery:
+      replicas: 1
+      resources:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+        limits:
+          cpu: 200m
+          memory: 256Mi
+
+  frontend:
+    replicas: 1
+    pdb:
+      enabled: false
+    envVars: {}
+    resources:
+      requests:
+        cpu: 25m
+        memory: 64Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
+
+  yProvider:
+    replicas: 1
+    pdb:
+      enabled: false
+    envVars:
+      COLLABORATION_BACKEND_BASE_URL: "http://docs-app-backend:8000"
+      COLLABORATION_SERVER_ORIGIN: "https://docs.cluster.samuelbagattin.com"
+      COLLABORATION_SERVER_SECRET:
+        secretKeyRef:
+          name: docs-secrets
+          key: COLLABORATION_SERVER_SECRET
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+
+# Hostname for HTTPRoute
+hostname: docs.cluster.samuelbagattin.com

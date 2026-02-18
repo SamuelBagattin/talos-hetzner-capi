@@ -1,0 +1,10 @@
+apiVersion: v2
+name: docs-app
+description: La Suite Docs collaborative document editor
+version: 0.1.0
+type: application
+
+dependencies:
+  - name: docs
+    version: 4.5.0
+    repository: https://suitenumerique.github.io/docs/

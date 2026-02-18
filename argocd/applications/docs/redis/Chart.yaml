@@ -1,0 +1,5 @@
+apiVersion: v2
+name: redis
+description: Lightweight Redis for La Suite Docs
+version: 0.1.0
+type: application

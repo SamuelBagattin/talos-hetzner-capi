@@ -23,6 +23,14 @@ spec:
         - ports:
             - port: "5432"
               protocol: TCP
+    # Docs connects from the docs namespace
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: docs
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
     # CNPG operator manages instances from cnpg-system namespace
     - fromEndpoints:
         - matchLabels:

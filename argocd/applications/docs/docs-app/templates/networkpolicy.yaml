@@ -1,0 +1,52 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: docs-app
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: docs
+  ingress:
+    # Allow traffic from envoy-gateway proxy
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: envoy-gateway-system
+  egress:
+    # Internal docs namespace communication (backend ↔ y-provider ↔ redis)
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: docs
+    # PostgreSQL in postgres namespace
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: postgres
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    # Hydra OIDC in identity namespace
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: identity
+      toPorts:
+        - ports:
+            - port: "4444"
+              protocol: TCP
+    # DNS resolution
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    # External: Hetzner Object Storage, OIDC discovery, Let's Encrypt
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP

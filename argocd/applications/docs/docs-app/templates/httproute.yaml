@@ -1,0 +1,72 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: docs
+  labels:
+    app.kubernetes.io/name: docs
+    app.kubernetes.io/part-of: talos-hetzner-capi
+    app.kubernetes.io/managed-by: argocd
+spec:
+  parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: envoy-gateway
+      namespace: envoy-gateway-system
+  hostnames:
+    - {{ .Values.hostname | default "docs.cluster.samuelbagattin.com" | quote }}
+  rules:
+    # /api → backend
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api
+      backendRefs:
+        - group: ""
+          kind: Service
+          name: docs-app-backend
+          port: 80
+          weight: 1
+    # /admin → backend
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /admin
+      backendRefs:
+        - group: ""
+          kind: Service
+          name: docs-app-backend
+          port: 80
+          weight: 1
+    # /collaboration/ws/ → y-provider (WebSocket)
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /collaboration/ws/
+      backendRefs:
+        - group: ""
+          kind: Service
+          name: docs-app-y-provider
+          port: 443
+          weight: 1
+    # /collaboration/api/ → y-provider (REST)
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /collaboration/api/
+      backendRefs:
+        - group: ""
+          kind: Service
+          name: docs-app-y-provider
+          port: 443
+          weight: 1
+    # / (catch-all) → frontend
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - group: ""
+          kind: Service
+          name: docs-app-frontend
+          port: 80
+          weight: 1

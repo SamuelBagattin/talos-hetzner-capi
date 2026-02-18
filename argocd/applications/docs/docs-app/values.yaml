@@ -80,6 +80,19 @@ docs:
           key: COLLABORATION_SERVER_SECRET
       COLLABORATION_SERVER_URL: "https://docs.cluster.samuelbagattin.com/collaboration"
       FRONTEND_HOMEPAGE_FEATURE_ENABLED: "True"
+    probes:
+      startup:
+        path: /__lbheartbeat__
+        initialDelaySeconds: 10
+        timeoutSeconds: 5
+      liveness:
+        path: /__heartbeat__
+        initialDelaySeconds: 10
+        timeoutSeconds: 5
+      readiness:
+        path: /__lbheartbeat__
+        initialDelaySeconds: 10
+        timeoutSeconds: 3
     resources:
       requests:
         cpu: 50m
@@ -89,6 +102,22 @@ docs:
         memory: 256Mi
     celery:
       replicas: 1
+      probes:
+        startup:
+          exec:
+            command: ["/bin/sh", "-c", "celery -A impress.celery_app inspect ping -d impress@$HOSTNAME"]
+          initialDelaySeconds: 30
+          timeoutSeconds: 10
+        liveness:
+          exec:
+            command: ["/bin/sh", "-c", "celery -A impress.celery_app inspect ping -d impress@$HOSTNAME"]
+          initialDelaySeconds: 30
+          timeoutSeconds: 10
+        readiness:
+          exec:
+            command: ["/bin/sh", "-c", "celery -A impress.celery_app inspect ping -d impress@$HOSTNAME"]
+          initialDelaySeconds: 15
+          timeoutSeconds: 10
       resources:
         requests:
           cpu: 50m
@@ -114,6 +143,15 @@ docs:
     replicas: 1
     pdb:
       enabled: false
+    probes:
+      startup:
+        path: /ping
+        initialDelaySeconds: 10
+        timeoutSeconds: 3
+      liveness:
+        path: /ping
+        initialDelaySeconds: 10
+        timeoutSeconds: 3
     envVars:
       COLLABORATION_BACKEND_BASE_URL: "http://docs-app-backend:8000"
       COLLABORATION_SERVER_ORIGIN: "https://docs.cluster.samuelbagattin.com"

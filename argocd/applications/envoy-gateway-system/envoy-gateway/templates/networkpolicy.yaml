@@ -19,8 +19,7 @@ spec:
         - cluster
 ---
 # Allow Envoy Gateway controller to reach kube-apiserver and manage proxy resources.
-# Ingress from proxy pods is required for the WASM cache server (port 18002),
-# xDS (18000/18001), and admin (19001).
+# Ingress from proxy pods is required for xDS (18000/18001) and admin (19001).
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -38,43 +37,5 @@ spec:
   egress:
     - toEntities:
         - kube-apiserver
-    - toEntities:
-        - cluster
-    # Required for pulling WASM OCI images (e.g. ghcr.io)
-    - toEntities:
-        - world
-      toPorts:
-        - ports:
-            - port: "443"
-              protocol: TCP
----
-# Allow Coraza WASM server: init container downloads from GitHub,
-# proxy pods fetch the binary via HTTP.
-apiVersion: cilium.io/v2
-kind: CiliumNetworkPolicy
-metadata:
-  name: coraza-wasm-server
-spec:
-  endpointSelector:
-    matchLabels:
-      app.kubernetes.io/name: coraza-wasm-server
-  ingress:
-    - fromEndpoints:
-        - matchLabels:
-            app.kubernetes.io/name: envoy
-            app.kubernetes.io/component: proxy
-            app.kubernetes.io/managed-by: envoy-gateway
-    - fromEndpoints:
-        - matchLabels:
-            control-plane: envoy-gateway
-  egress:
-    # Init container needs to download from GitHub
-    - toEntities:
-        - world
-      toPorts:
-        - ports:
-            - port: "443"
-              protocol: TCP
-    # DNS resolution
     - toEntities:
         - cluster

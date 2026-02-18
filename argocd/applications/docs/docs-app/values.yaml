@@ -21,7 +21,7 @@ docs:
       enabled: false
     envVars:
       DJANGO_CONFIGURATION: "Production"
-      DJANGO_ALLOWED_HOSTS: "docs.cluster.samuelbagattin.com"
+      DJANGO_ALLOWED_HOSTS: "docs.cluster.samuelbagattin.com,localhost,*"
       DJANGO_CSRF_TRUSTED_ORIGINS: "https://docs.cluster.samuelbagattin.com"
       DJANGO_EMAIL_BACKEND: "django.core.mail.backends.console.EmailBackend"
       DB_HOST: "postgres-cluster-rw.postgres.svc.cluster.local"
@@ -95,11 +95,11 @@ docs:
         timeoutSeconds: 3
     resources:
       requests:
-        cpu: 50m
-        memory: 128Mi
-      limits:
-        cpu: 200m
+        cpu: 100m
         memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
     celery:
       replicas: 1
       probes:

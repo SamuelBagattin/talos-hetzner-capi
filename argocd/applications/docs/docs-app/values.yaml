@@ -83,7 +83,7 @@ docs:
     probes:
       startup:
         path: /__lbheartbeat__
-        initialDelaySeconds: 10
+        initialDelaySeconds: 60
         timeoutSeconds: 5
       liveness:
         path: /__heartbeat__
@@ -106,7 +106,7 @@ docs:
         startup:
           exec:
             command: ["/bin/sh", "-c", "celery -A impress.celery_app inspect ping -d impress@$HOSTNAME"]
-          initialDelaySeconds: 30
+          initialDelaySeconds: 60
           timeoutSeconds: 10
         liveness:
           exec:
@@ -146,8 +146,8 @@ docs:
     probes:
       startup:
         path: /ping
-        initialDelaySeconds: 10
-        timeoutSeconds: 3
+        initialDelaySeconds: 60
+        timeoutSeconds: 5
       liveness:
         path: /ping
         initialDelaySeconds: 10

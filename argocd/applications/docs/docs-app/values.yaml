@@ -160,6 +160,7 @@ docs:
     envVars:
       COLLABORATION_BACKEND_BASE_URL: "https://docs.cluster.samuelbagattin.com"
       COLLABORATION_SERVER_ORIGIN: "https://docs.cluster.samuelbagattin.com"
+      COLLABORATION_LOGGING: "true"
       COLLABORATION_SERVER_SECRET:
         secretKeyRef:
           name: docs-secrets

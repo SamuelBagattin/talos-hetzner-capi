@@ -158,7 +158,7 @@ docs:
         initialDelaySeconds: 10
         timeoutSeconds: 3
     envVars:
-      COLLABORATION_BACKEND_BASE_URL: "http://docs-app-backend:8000"
+      COLLABORATION_BACKEND_BASE_URL: "http://docs-app-backend"
       COLLABORATION_SERVER_ORIGIN: "https://docs.cluster.samuelbagattin.com"
       COLLABORATION_SERVER_SECRET:
         secretKeyRef:

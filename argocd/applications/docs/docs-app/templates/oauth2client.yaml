@@ -16,4 +16,4 @@ spec:
   tokenEndpointAuthMethod: client_secret_post
   skipConsent: true
   redirectUris:
-    - "https://{{ .Values.hostname }}/oidc/callback/"
+    - "https://{{ .Values.hostname }}/api/v1.0/callback/"

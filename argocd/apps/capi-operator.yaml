@@ -33,7 +33,7 @@ spec:
         infrastructure:
           hetzner:
             # renovate: datasource=github-releases depName=syself/cluster-api-provider-hetzner
-            version: v1.0.10
+            version: v1.0.11
             namespace: caph-system
         addon:
           helm:

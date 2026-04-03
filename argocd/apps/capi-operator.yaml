@@ -38,7 +38,7 @@ spec:
         addon:
           helm:
             # renovate: datasource=github-releases depName=kubernetes-sigs/cluster-api-addon-provider-helm
-            version: v0.6.1
+            version: v0.6.2
             namespace: caaph-system
   destination:
     server: https://kubernetes.default.svc

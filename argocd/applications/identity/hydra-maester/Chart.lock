@@ -1,6 +1,6 @@
 dependencies:
 - name: hydra-maester
   repository: https://k8s.ory.sh/helm/charts
-  version: 0.61.0
-digest: sha256:2784d8c6cf60cb5d5360f0fc2658c6ea7d894c25d2a3b990f175e7a0b5b0cbc2
-generated: "2026-03-23T16:53:24.217348909Z"
+  version: 0.61.1
+digest: sha256:df54430f18d4b5a01bb8ae85a72c80cc70c3723d5371d508fa9d64f5660b7f08
+generated: "2026-04-09T19:15:40.139933071Z"

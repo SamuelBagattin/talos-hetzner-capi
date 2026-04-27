@@ -24,7 +24,7 @@ CAPH_VERSION    ?= v1.0.12
 # renovate: datasource=github-releases depName=siderolabs/cluster-api-bootstrap-provider-talos
 CABPT_VERSION   ?= v0.6.12
 # renovate: datasource=github-releases depName=siderolabs/cluster-api-control-plane-provider-talos
-CACPPT_VERSION  ?= v0.5.12
+CACPPT_VERSION  ?= v0.5.13
 # renovate: datasource=github-releases depName=kubernetes-sigs/cluster-api-addon-provider-helm
 CAAPH_VERSION   ?= v0.6.2
 

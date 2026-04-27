@@ -28,7 +28,7 @@ spec:
         controlPlane:
           talos:
             # renovate: datasource=github-releases depName=siderolabs/cluster-api-control-plane-provider-talos
-            version: v0.5.12
+            version: v0.5.13
             namespace: cacppt-system
         infrastructure:
           hetzner:

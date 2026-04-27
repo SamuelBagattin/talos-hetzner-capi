@@ -23,7 +23,7 @@ spec:
         bootstrap:
           talos:
             # renovate: datasource=github-releases depName=siderolabs/cluster-api-bootstrap-provider-talos
-            version: v0.6.11
+            version: v0.6.12
             namespace: cabpt-system
         controlPlane:
           talos:

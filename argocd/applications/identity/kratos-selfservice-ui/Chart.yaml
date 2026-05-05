@@ -6,5 +6,5 @@ type: application
 
 dependencies:
   - name: kratos-selfservice-ui-node
-    version: 0.61.1
+    version: 0.61.2
     repository: https://k8s.ory.sh/helm/charts

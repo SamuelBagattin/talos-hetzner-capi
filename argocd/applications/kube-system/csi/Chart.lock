@@ -1,6 +1,6 @@
 dependencies:
 - name: hcloud-csi
   repository: https://charts.hetzner.cloud
-  version: 2.20.2
-digest: sha256:f01f14206f6990bea9e1e5bb1a39f41ff95507f181bd086003c5485e553aa2ba
-generated: "2026-04-16T10:06:24.679425451Z"
+  version: 2.21.0
+digest: sha256:21d0ddaf81b6944b6eb6e5ada6c3c72d6cef2d6a8aad8b078cd341036120f7d1
+generated: "2026-05-12T13:08:01.305223394Z"

@@ -99,7 +99,7 @@ spec:
       ccm-talos: "true"
   repoURL: oci://ghcr.io/siderolabs/charts
   chartName: talos-cloud-controller-manager
-  version: 0.5.4
+  version: 0.5.5
   namespace: kube-system
   releaseName: talos-ccm
   valuesTemplate: |

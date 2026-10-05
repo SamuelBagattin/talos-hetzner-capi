@@ -20,7 +20,7 @@ LOCATION        ?= nbg1
 # renovate: datasource=github-releases depName=kubernetes-sigs/cluster-api
 CAPI_VERSION    ?= v1.14.2
 # renovate: datasource=github-releases depName=syself/cluster-api-provider-hetzner
-CAPH_VERSION    ?= v1.1.8
+CAPH_VERSION    ?= v1.1.9
 # renovate: datasource=github-releases depName=siderolabs/cluster-api-bootstrap-provider-talos
 CABPT_VERSION   ?= v0.6.13
 # renovate: datasource=github-releases depName=siderolabs/cluster-api-control-plane-provider-talos

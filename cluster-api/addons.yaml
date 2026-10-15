@@ -12,7 +12,7 @@ spec:
       cni: cilium
   repoURL: https://helm.cilium.io/
   chartName: cilium
-  version: 1.20.2
+  version: 1.20.3
   namespace: kube-system
   releaseName: cilium
   valuesTemplate: |
